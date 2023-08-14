@@ -103,12 +103,12 @@ io.on("connection", (socket) => {
     // 接続が切れた場合
     socket.on("disconnect", () => {
         const user = users.find((u) => u.id == socket.id);
-        if (!user) {
+        const roomIndex = rooms.findIndex((r) => r.id == user.roomId);
+        const room = rooms[roomIndex];
+        if (room.users.length === 1) {
             // userデータがないときは未入室なので何もせず終了
             return;
         }
-        const roomIndex = rooms.findIndex((r) => r.id == user.roomId);
-        const room = rooms[roomIndex];
         const userIndex = room.users.findIndex((u) => u.id == socket.id);
         // ターンプレイヤーの場合、次のユーザーに進める
         if (userIndex == room.turnUserIndex) {
@@ -124,7 +124,6 @@ io.on("connection", (socket) => {
         if (room.turnUserIndex > userIndex) {
             rooms[roomIndex].turnUserIndex--;
         }
-
         io.in(room.id).emit(
             "notifyDisconnection",
             user.name,
