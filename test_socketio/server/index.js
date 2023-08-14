@@ -1,4 +1,5 @@
-import { get_card } from './src/card.mjs';
+import { get_card } from './src/get_card.mjs';
+
 
 import { createServer } from "http";
 import { Server } from "socket.io";
