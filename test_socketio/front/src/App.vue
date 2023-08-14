@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <h5>test socketio</h5>
+    <h5>test socket.io</h5>
     <!-- 入室済の場合、部屋の情報を表示 -->
     <div v-if="isJoined">
       <div>{{ userName }} さん</div>
@@ -51,6 +51,16 @@
         <div>{{ post.userName }} : " {{ post.word }} "</div>
       </div>
 
+      <!-- カード -->
+      <div v-for="(card, i) in cards" :key="i">
+        <div>{{ card.userName }} : " {{ card.card }} "</div>
+      </div>
+
+      <!-- get_cardボタン -->
+      <div>
+        <input type="button" value="get_card" @click="get_card">
+      </div>
+
       <!-- 終了ボタン -->
       <div>
         <input type="button" value="終了" @click="exit" />
@@ -72,6 +82,7 @@ export default {
     input: "",
     turnUserName: "",
     posts: [],
+    cards:[],
     isGameOver: false,
     socket: io("http://localhost:3031"),
   }),
@@ -89,6 +100,7 @@ export default {
       this.message = "";
       this.turnUserName = room.users[room.turnUserIndex].name;
       this.posts = room.posts;
+      this.cards = room.cards;
       this.input = "";
       this.isGameOver = room.isGameOver;
     });
@@ -116,6 +128,11 @@ export default {
 
     postWord() {
       this.socket.emit("post", this.input);
+      this.message = "";
+    },
+
+    get_card(){
+      this.socket.emit("getCard");
       this.message = "";
     },
 

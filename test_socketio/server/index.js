@@ -1,9 +1,15 @@
-const http = require("http").createServer();
-const io = require("socket.io")(http, {
+import { get_card } from './src/card.mjs';
+
+import { createServer } from "http";
+import { Server } from "socket.io";
+
+const http = createServer();
+const io = new Server(http, {
     cors: {
         origin: ["http://localhost:8080"],
     },
 });
+
 const rooms = [];
 const users = [];
 
@@ -23,6 +29,9 @@ io.on("connection", (socket) => {
             users: [user],
             turnUserIndex: 0,
             posts: [],
+            cards: [
+                {userName: userName,card:[]},
+            ],
         };
         rooms.push(room);
         users.push(user);
@@ -43,6 +52,7 @@ io.on("connection", (socket) => {
         }
         const user = { id: socket.id, name: userName, roomId };
         rooms[roomIndex].users.push(user);
+        rooms[roomIndex].cards.unshift({userName:user.name, card:[]});
         users.push(user);
         socket.join(rooms[roomIndex].id);
         io.to(socket.id).emit("updateRoom", rooms[roomIndex]);
@@ -79,6 +89,51 @@ io.on("connection", (socket) => {
         io.in(room.id).emit("updateRoom", room);
     });
 
+    //get_card
+    socket.on("getCard", () => {
+        // 送信したuser
+        const user = users.find((u) => u.id == socket.id);
+        // ルームのインデックス
+        const roomIndex = rooms.findIndex((r) => r.id == user.roomId);
+        const room = rooms[roomIndex];
+        // ターンプレイヤーかチェック
+        if (room.users[room.turnUserIndex].id != socket.id) {
+            io.to(socket.id).emit("notifyError", "あなたのターンではありません");
+            return;
+        }
+
+        const draw_card = [];
+        for (let i = 0; i < 3; i++) {
+            draw_card.unshift(get_card());
+        }
+
+        // 既存の連想配列を検索してuserNameが一致するcardを探す
+        const targetCardIndex = rooms[roomIndex].cards.findIndex((c) => c.userName === user.name);
+
+        if (targetCardIndex !== -1) {
+            // 該当するカードが見つかった場合、そのカードにdraw_cardを追加
+            rooms[roomIndex].cards[targetCardIndex].card = rooms[roomIndex].cards[targetCardIndex].card.concat(draw_card);
+        } else {
+            // 該当するカードが見つからなかった場合、新しいカードとして連想配列に追加
+            rooms[roomIndex].cards.unshift({
+                userName: user.name,
+                card: draw_card,
+                // isGameOver: checkGameOver(input),
+            });
+        }
+
+        console.log(draw_card);
+        console.log(room);
+        console.log(rooms[roomIndex]);
+        console.log("cards:", rooms[roomIndex].cards);
+
+        // ターンプレイヤーを次のユーザーに進める
+        rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
+
+        io.in(room.id).emit("updateRoom", room);
+    });
+
+
     // 最初から始める
     socket.on("restart", () => {
         const user = users.find((u) => u.id == socket.id);
@@ -103,13 +158,24 @@ io.on("connection", (socket) => {
     // 接続が切れた場合
     socket.on("disconnect", () => {
         const user = users.find((u) => u.id == socket.id);
+        if (!user) {
+            // userデータがないときは未入室なので何もせず終了
+            return;
+        }
         const roomIndex = rooms.findIndex((r) => r.id == user.roomId);
+        if (roomIndex === -1) {
+            // roomが見つからない場合も何もせず終了
+            return;
+        }
         const room = rooms[roomIndex];
         if (room.users.length === 1) {
             // userデータがないときは未入室なので何もせず終了
             return;
         }
         const userIndex = room.users.findIndex((u) => u.id == socket.id);
+        if (userIndex === -1) {
+            return;
+        }
         // ターンプレイヤーの場合、次のユーザーに進める
         if (userIndex == room.turnUserIndex) {
             rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
