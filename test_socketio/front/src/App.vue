@@ -42,8 +42,8 @@
       <div v-else>
         <div>{{ turnUserName }}さんのターン:</div>
 
-        <input type="text" v-model="input" />
-        <input type="button" value="送信" @click="postWord" />
+        <!-- <input type="text" v-model="input" />
+        <input type="button" value="送信" @click="postWord" /> -->
       </div>
 
       <!-- 入力履歴 -->
