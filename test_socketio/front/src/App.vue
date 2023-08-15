@@ -56,6 +56,22 @@
         <div>{{ card.userName }} : " {{ card.card }} "</div>
       </div>
 
+      <!-- <p>{{ cards[0].card }}</p>
+      <p>{{ userName }}</p>
+      <p>{{ cards[0].userName }}</p> -->
+      <div v-for="(card, i) in cards" :key="i">
+        <div v-if="card.userName == userName">
+          <!-- <p>{{ card }}</p> -->
+            <button
+              v-for="(btn, i) in card.card"
+              :key="i"
+              style="display: inline-block; margin-right: 10px"
+            >
+              {{ btn }}
+            </button>
+        </div>
+      </div>
+
       <!-- action -->
       <div>
         <input type="button" value="ドロー" @click="action_draw" />
