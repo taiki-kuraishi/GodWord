@@ -182,8 +182,9 @@ io.on("connection", (socket) => {
         rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
 
         io.in(room.id).emit("updateRoom", room);
-        io.to(socket.id).emit("notifyError", "正解");
-
+        if (query === 2) {
+            io.to(socket.id).emit("notifyError", "正解");
+        }
     });
 
 
