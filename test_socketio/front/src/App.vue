@@ -56,19 +56,27 @@
         <div>{{ card.userName }} : " {{ card.card }} "</div>
       </div>
 
+      <!-- collect_input_box -->
+      <input type="text" v-model="collect" readonly />
+      <!-- delete_button -->
+      <input type="button" value="1文字消す" @click="pop_collect" />
+
+      <!-- ボタン -->
       <!-- <p>{{ cards[0].card }}</p>
       <p>{{ userName }}</p>
       <p>{{ cards[0].userName }}</p> -->
       <div v-for="(card, i) in cards" :key="i">
         <div v-if="card.userName == userName">
           <!-- <p>{{ card }}</p> -->
-            <button
-              v-for="(btn, i) in card.card"
-              :key="i"
-              style="display: inline-block; margin-right: 10px"
-            >
-              {{ btn }}
-            </button>
+          <input
+            v-for="(btn, i) in card.card"
+            :key="i"
+            type="button"
+            :value="btn"
+            v-bind:disabled="active_button(btn)"
+            @click="selectButton(btn)"
+            style="display: inline-block; margin-right: 10px"
+          />
         </div>
       </div>
 
@@ -101,6 +109,7 @@ export default {
     turnUserName: "",
     posts: [],
     cards: [],
+    collect: [],
     action: -1,
     isGameOver: false,
     socket: io("http://localhost:3031"),
@@ -151,6 +160,16 @@ export default {
       this.message = "";
     },
 
+    //ボタン
+    selectButton(btn) {
+      this.collect.push(btn);
+    },
+
+    //1文字消す
+    pop_collect() {
+      this.collect.pop(this.collect.length);
+    },
+
     //ドロー
     action_draw() {
       this.socket.emit("action", 0);
@@ -165,8 +184,12 @@ export default {
 
     //提出
     action_collect() {
-      this.socket.emit("action", 2);
+      this.socket.emit("action", 2, this.collect);
       this.message = "";
+    },
+
+    active_button(btn){
+      return this.collect.includes(btn);
     },
 
     restart() {

@@ -92,7 +92,7 @@ io.on("connection", (socket) => {
     });
 
     //action
-    socket.on("action", (query) => {
+    socket.on("action", (query,collect = null) => {
         // 送信したuser
         const user = users.find((u) => u.id == socket.id);
         // ルームのインデックス
