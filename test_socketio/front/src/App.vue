@@ -56,9 +56,11 @@
         <div>{{ card.userName }} : " {{ card.card }} "</div>
       </div>
 
-      <!-- get_cardボタン -->
+      <!-- action -->
       <div>
-        <input type="button" value="get_card" @click="get_card">
+        <input type="button" value="ドロー" @click="action_draw" />
+        <input type="button" value="2倍" @click="action_double" />
+        <input type="button" value="提出" @click="action_collect" />
       </div>
 
       <!-- 終了ボタン -->
@@ -82,7 +84,8 @@ export default {
     input: "",
     turnUserName: "",
     posts: [],
-    cards:[],
+    cards: [],
+    action: -1,
     isGameOver: false,
     socket: io("http://localhost:3031"),
   }),
@@ -101,6 +104,7 @@ export default {
       this.turnUserName = room.users[room.turnUserIndex].name;
       this.posts = room.posts;
       this.cards = room.cards;
+      this.actions = -1;
       this.input = "";
       this.isGameOver = room.isGameOver;
     });
@@ -131,8 +135,21 @@ export default {
       this.message = "";
     },
 
-    get_card(){
-      this.socket.emit("getCard");
+    //ドロー
+    action_draw() {
+      this.socket.emit("action", 0);
+      this.message = "";
+    },
+
+    //2倍
+    action_double() {
+      this.socket.emit("action", 1);
+      this.message = "";
+    },
+
+    //提出
+    action_collect() {
+      this.socket.emit("action", 2);
       this.message = "";
     },
 
@@ -141,10 +158,10 @@ export default {
       this.message = "";
     },
 
-    exit(){
+    exit() {
       this.socket.emit("exit");
       this.message = "";
-    }
+    },
   },
 };
 </script>

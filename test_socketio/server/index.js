@@ -1,5 +1,5 @@
 import { get_card } from './src/get_card.mjs';
-
+import Deck from './src/deck.mjs';
 
 import { createServer } from "http";
 import { Server } from "socket.io";
@@ -25,13 +25,15 @@ io.on("connection", (socket) => {
         }
         const roomId = generateRoomId();
         const user = { id: socket.id, name: userName, roomId };
+        const server_deck = new Deck(1)
         const room = {
             id: roomId,
             users: [user],
             turnUserIndex: 0,
             posts: [],
+            deck: server_deck,
             cards: [
-                {userName: userName,card:[]},
+                { userName: userName, card: [] },
             ],
         };
         rooms.push(room);
@@ -53,7 +55,7 @@ io.on("connection", (socket) => {
         }
         const user = { id: socket.id, name: userName, roomId };
         rooms[roomIndex].users.push(user);
-        rooms[roomIndex].cards.unshift({userName:user.name, card:[]});
+        rooms[roomIndex].cards.unshift({ userName: user.name, card: [] });
         users.push(user);
         socket.join(rooms[roomIndex].id);
         io.to(socket.id).emit("updateRoom", rooms[roomIndex]);
@@ -90,8 +92,8 @@ io.on("connection", (socket) => {
         io.in(room.id).emit("updateRoom", room);
     });
 
-    //get_card
-    socket.on("getCard", () => {
+    //action
+    socket.on("action", (query) => {
         // 送信したuser
         const user = users.find((u) => u.id == socket.id);
         // ルームのインデックス
@@ -103,30 +105,42 @@ io.on("connection", (socket) => {
             return;
         }
 
-        const draw_card = [];
-        for (let i = 0; i < 3; i++) {
-            draw_card.unshift(get_card());
+        //action
+        //ドロー
+        if(query === 0){
+            // 既存の連想配列を検索してuserNameが一致するcardを探す
+            const targetCardIndex = rooms[roomIndex].cards.findIndex((c) => c.userName === user.name);
+
+            if (targetCardIndex !== -1) {
+                // 該当するカードが見つかった場合、そのカードにdraw_cardを追加
+                rooms[roomIndex].cards[targetCardIndex].card = rooms[roomIndex].cards[targetCardIndex].card.concat(rooms[roomIndex].deck.getCard(3));
+            } else {
+                // 該当するカードが見つからなかった場合、新しいカードとして連想配列に追加
+                rooms[roomIndex].cards.unshift({
+                    userName: user.name,
+                    card: rooms[roomIndex].deck.getCard(3),
+                    // isGameOver: checkGameOver(input),
+                });
+            }
+        }
+        //2倍
+        else if(query === 1){
+
+        }
+        //提出
+        else if(query === 2){
+        }
+        //例外処理
+        else{
+            return 
         }
 
-        // 既存の連想配列を検索してuserNameが一致するcardを探す
-        const targetCardIndex = rooms[roomIndex].cards.findIndex((c) => c.userName === user.name);
-
-        if (targetCardIndex !== -1) {
-            // 該当するカードが見つかった場合、そのカードにdraw_cardを追加
-            rooms[roomIndex].cards[targetCardIndex].card = rooms[roomIndex].cards[targetCardIndex].card.concat(draw_card);
-        } else {
-            // 該当するカードが見つからなかった場合、新しいカードとして連想配列に追加
-            rooms[roomIndex].cards.unshift({
-                userName: user.name,
-                card: draw_card,
-                // isGameOver: checkGameOver(input),
-            });
-        }
-
-        console.log(draw_card);
+        // console.log(draw_card);
         console.log(room);
-        console.log(rooms[roomIndex]);
-        console.log("cards:", rooms[roomIndex].cards);
+        // console.log(rooms[roomIndex]);
+        // console.log("cards:", rooms[roomIndex].cards);
+        console.log(rooms[roomIndex].deck.cards);
+        // console.log(rooms[roomIndex].deck.getCard(3));
 
         // ターンプレイヤーを次のユーザーに進める
         rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);

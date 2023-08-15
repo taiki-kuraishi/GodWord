@@ -2,6 +2,8 @@
 import Deck from './deck.mjs';
 
 const deck = new Deck(1);
-const drawnCards = deck.getCard(3);
-console.log(deck);
-console.log(drawnCards);
+
+for (let i = 0; i <= 5; i++) {
+    console.log(deck.cards);
+    console.log(deck.getCard(3));
+}
