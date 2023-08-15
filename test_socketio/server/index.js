@@ -3,6 +3,8 @@ import Deck from './src/deck.mjs';
 import { createServer } from "http";
 import { Server } from "socket.io";
 
+import { Client } from 'pg';
+
 const http = createServer();
 const io = new Server(http, {
     cors: {
