@@ -1,14 +1,3 @@
-import pkg from 'pg';
-const { Client } = pkg;
-
-const client = new Client({
-    host: "localhost",
-    port: 5432,
-    user: "postgres",
-    password: "PASSWORD",
-    database: "GodWord"
-});
-
 client.connect(async (err) => {
     if (err) throw err;
     console.log('PostgreSQL Connected...');

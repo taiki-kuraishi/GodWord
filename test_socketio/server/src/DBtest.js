@@ -14,20 +14,18 @@ client.connect(async (err) => {
     console.log('PostgreSQL Connected...');
 
     try {
-        const query_1 = 'SELECT * FROM godwordtable limit 10';
+        const queryValue = "000";
+        const query_1 = `select * from godwordtable where title = '${queryValue}';`;
         const result_1 = await client.query(query_1);
 
-        console.log('Database Contents:');
-        console.log('id, title, length');
-        for (const row of result_1.rows) {
-            console.log(`${row.id}, ${row.title}, ${row.length}`);
+        if (result_1.rows[0]) {
+            console.log("データが存在します。");
+            for (const row of result_1.rows) {
+                console.log(`${row.id}, ${row.title}, ${row.length}`);
+            }
+        } else {
+            console.log("データは存在しません。");
         }
-
-        const query_2 = 'select count(*) from godwordtable;';
-        const result_2 = await client.query(query_2);
-        console.log('DB length');
-        console.log(result_2.rows[0].count);
-
     } catch (err) {
         console.error('Error querying database:', err);
     } finally {

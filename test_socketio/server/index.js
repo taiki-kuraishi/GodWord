@@ -3,7 +3,20 @@ import Deck from './src/deck.mjs';
 import { createServer } from "http";
 import { Server } from "socket.io";
 
-import { Client } from 'pg';
+import pkg from 'pg';
+const { Client } = pkg;
+
+const client = new Client({
+    host: "localhost",
+    port: 5432,
+    user: "postgres",
+    password: "PASSWORD",
+    database: "GodWord"
+});
+client.connect(async (err) => {
+    if (err) throw err;
+    console.log('PostgreSQL Connected... query: 2');
+});
 
 const http = createServer();
 const io = new Server(http, {
@@ -34,7 +47,7 @@ io.on("connection", (socket) => {
             posts: [],
             deck: server_deck,
             cards: [
-                { userName: userName, card: [] },
+                { userName: userName, card: [], index: [] },
             ],
         };
         rooms.push(room);
@@ -94,7 +107,7 @@ io.on("connection", (socket) => {
     });
 
     //action
-    socket.on("action", (query,collect = null) => {
+    socket.on("action", async (query, collect = null) => {
         // 送信したuser
         const user = users.find((u) => u.id == socket.id);
         // ルームのインデックス
@@ -108,32 +121,54 @@ io.on("connection", (socket) => {
 
         //action
         //ドロー
-        if(query === 0){
+        if (query === 0) {
             // 既存の連想配列を検索してuserNameが一致するcardを探す
             const targetCardIndex = rooms[roomIndex].cards.findIndex((c) => c.userName === user.name);
 
             if (targetCardIndex !== -1) {
                 // 該当するカードが見つかった場合、そのカードにdraw_cardを追加
                 rooms[roomIndex].cards[targetCardIndex].card = rooms[roomIndex].cards[targetCardIndex].card.concat(rooms[roomIndex].deck.getCard(3));
+                const indexArray = [];
+                for (var i = 0; i <= rooms[roomIndex].cards[targetCardIndex].card.length; i++) {
+                    indexArray.push(i);
+                }
+                rooms[roomIndex].cards[targetCardIndex].index = indexArray
             } else {
                 // 該当するカードが見つからなかった場合、新しいカードとして連想配列に追加
                 rooms[roomIndex].cards.unshift({
                     userName: user.name,
                     card: rooms[roomIndex].deck.getCard(3),
-                    // isGameOver: checkGameOver(input),
+                    index: [1, 2, 3],
                 });
             }
+            //sort cards
+            rooms[roomIndex].cards[targetCardIndex].card.sort();
         }
         //2倍
-        else if(query === 1){
+        else if (query === 1) {
 
         }
         //提出
-        else if(query === 2){
+        else if (query === 2) {
+            try {
+                const query_1 = `select * from godwordtable where title = '${collect}';`;
+                const result_1 = await client.query(query_1);
+
+                if (result_1.rows[0]) {
+                    console.log("データが存在します。");
+                } else {
+                    console.log("データは存在しません。");
+                    io.to(socket.id).emit("notifyError", "データは存在しません");
+                    return
+                }
+            } catch (err) {
+                console.error('Error querying database:', err);
+                return
+            }
         }
         //例外処理
-        else{
-            return 
+        else {
+            return
         }
 
         // console.log(draw_card);
@@ -147,6 +182,8 @@ io.on("connection", (socket) => {
         rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
 
         io.in(room.id).emit("updateRoom", room);
+        io.to(socket.id).emit("notifyError", "正解");
+
     });
 
 

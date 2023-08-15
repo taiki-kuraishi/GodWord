@@ -57,9 +57,11 @@
       </div>
 
       <!-- collect_input_box -->
-      <input type="text" v-model="collect" readonly />
+      <input type="text" v-model="collectText" readonly />
       <!-- delete_button -->
       <input type="button" value="1文字消す" @click="pop_collect" />
+      <p>{{ cards }}</p>
+      <p>{{ collectArray }}</p>
 
       <!-- ボタン -->
       <!-- <p>{{ cards[0].card }}</p>
@@ -73,8 +75,8 @@
             :key="i"
             type="button"
             :value="btn"
-            v-bind:disabled="active_button(btn)"
-            @click="selectButton(btn)"
+            v-bind:disabled="active_button(btn, i)"
+            @click="selectButton(btn, i)"
             style="display: inline-block; margin-right: 10px"
           />
         </div>
@@ -109,7 +111,8 @@ export default {
     turnUserName: "",
     posts: [],
     cards: [],
-    collect: [],
+    collectArray: [],
+    collectText: [],
     action: -1,
     isGameOver: false,
     socket: io("http://localhost:3031"),
@@ -130,6 +133,8 @@ export default {
       this.posts = room.posts;
       this.cards = room.cards;
       this.actions = -1;
+      this.collectArray = [],
+      this.collectText = [],
       this.input = "";
       this.isGameOver = room.isGameOver;
     });
@@ -161,13 +166,15 @@ export default {
     },
 
     //ボタン
-    selectButton(btn) {
-      this.collect.push(btn);
+    selectButton(btn, index) {
+      this.collectArray.push({ index: index, btn: btn });
+      this.collectText = this.collectArray.map((item) => item.btn).join("");
     },
 
     //1文字消す
     pop_collect() {
-      this.collect.pop(this.collect.length);
+      this.collectArray.pop();
+      this.collectText = this.collectText.slice(0, -1);
     },
 
     //ドロー
@@ -184,12 +191,16 @@ export default {
 
     //提出
     action_collect() {
-      this.socket.emit("action", 2, this.collect);
+      this.socket.emit("action", 2, this.collectText);
       this.message = "";
     },
 
-    active_button(btn){
-      return this.collect.includes(btn);
+    active_button(btn, index) {
+      return (
+        this.collectArray.find(
+          (item) => item.index === index && item.btn === btn
+        ) !== undefined
+      );
     },
 
     restart() {
