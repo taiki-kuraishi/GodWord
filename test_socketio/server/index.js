@@ -1,4 +1,3 @@
-import { get_card } from './src/get_card.mjs';
 import Deck from './src/deck.mjs';
 
 import { createServer } from "http";
