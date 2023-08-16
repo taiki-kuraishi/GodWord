@@ -1,9 +1,36 @@
-const http = require("http").createServer();
-const io = require("socket.io")(http, {
+//    ______              __ _       __                      __
+//   / ____/  ____   ____/ /| |     / /  ____    _____  ____/ /
+//  / / __   / __ \ / __  / | | /| / /  / __ \  / ___/ / __  /
+// / /_/ /  / /_/ // /_/ /  | |/ |/ /  / /_/ / / /    / /_/ /
+// \____/   \____/ \__,_/   |__/|__/   \____/ /_/     \__,_/
+
+import Deck from './src/deck.mjs';
+
+import { createServer } from "http";
+import { Server } from "socket.io";
+
+import pkg from 'pg';
+const { Client } = pkg;
+
+const client = new Client({
+    host: "localhost",
+    port: 5432,
+    user: "postgres",
+    password: "PASSWORD",
+    database: "GodWord"
+});
+client.connect(async (err) => {
+    if (err) throw err;
+    console.log('PostgreSQL Connected... query: 2');
+});
+
+const http = createServer();
+const io = new Server(http, {
     cors: {
         origin: ["http://localhost:8080"],
     },
 });
+
 const rooms = [];
 const users = [];
 
@@ -18,11 +45,16 @@ io.on("connection", (socket) => {
         }
         const roomId = generateRoomId();
         const user = { id: socket.id, name: userName, roomId };
+        const server_deck = new Deck(1)
         const room = {
             id: roomId,
             users: [user],
             turnUserIndex: 0,
             posts: [],
+            deck: server_deck,
+            cards: [
+                { userName: userName, card: [], index: [] },
+            ],
         };
         rooms.push(room);
         users.push(user);
@@ -43,6 +75,7 @@ io.on("connection", (socket) => {
         }
         const user = { id: socket.id, name: userName, roomId };
         rooms[roomIndex].users.push(user);
+        rooms[roomIndex].cards.unshift({ userName: user.name, card: [] });
         users.push(user);
         socket.join(rooms[roomIndex].id);
         io.to(socket.id).emit("updateRoom", rooms[roomIndex]);
@@ -79,6 +112,88 @@ io.on("connection", (socket) => {
         io.in(room.id).emit("updateRoom", room);
     });
 
+    //action
+    socket.on("action", async (query, collect = null) => {
+        // 送信したuser
+        const user = users.find((u) => u.id == socket.id);
+        // ルームのインデックス
+        const roomIndex = rooms.findIndex((r) => r.id == user.roomId);
+        const room = rooms[roomIndex];
+        // ターンプレイヤーかチェック
+        if (room.users[room.turnUserIndex].id != socket.id) {
+            io.to(socket.id).emit("notifyError", "あなたのターンではありません");
+            return;
+        }
+
+        //action
+        //ドロー
+        if (query === 0) {
+            // 既存の連想配列を検索してuserNameが一致するcardを探す
+            const targetCardIndex = rooms[roomIndex].cards.findIndex((c) => c.userName === user.name);
+
+            if (targetCardIndex !== -1) {
+                // 該当するカードが見つかった場合、そのカードにdraw_cardを追加
+                rooms[roomIndex].cards[targetCardIndex].card = rooms[roomIndex].cards[targetCardIndex].card.concat(rooms[roomIndex].deck.getCard(3));
+                const indexArray = [];
+                for (var i = 0; i <= rooms[roomIndex].cards[targetCardIndex].card.length; i++) {
+                    indexArray.push(i);
+                }
+                rooms[roomIndex].cards[targetCardIndex].index = indexArray
+            } else {
+                // 該当するカードが見つからなかった場合、新しいカードとして連想配列に追加
+                rooms[roomIndex].cards.unshift({
+                    userName: user.name,
+                    card: rooms[roomIndex].deck.getCard(3),
+                    index: [1, 2, 3],
+                });
+            }
+            //sort cards
+            rooms[roomIndex].cards[targetCardIndex].card.sort();
+        }
+        //2倍
+        else if (query === 1) {
+
+        }
+        //提出
+        else if (query === 2) {
+            try {
+                const query_1 = `select * from godwordtable where title = '${collect}';`;
+                const result_1 = await client.query(query_1);
+
+                if (result_1.rows[0]) {
+                    console.log("データが存在します。");
+                } else {
+                    console.log("データは存在しません。");
+                    io.to(socket.id).emit("notifyError", "データは存在しません");
+                    return
+                }
+            } catch (err) {
+                console.error('Error querying database:', err);
+                return
+            }
+        }
+        //例外処理
+        else {
+            return
+        }
+
+        // console.log(draw_card);
+        console.log(room);
+        // console.log(rooms[roomIndex]);
+        // console.log("cards:", rooms[roomIndex].cards);
+        console.log(rooms[roomIndex].deck.cards);
+        // console.log(rooms[roomIndex].deck.getCard(3));
+
+        // ターンプレイヤーを次のユーザーに進める
+        rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
+
+        io.in(room.id).emit("updateRoom", room);
+        if (query === 2) {
+            io.to(socket.id).emit("notifyError", "正解");
+        }
+    });
+
+
     // 最初から始める
     socket.on("restart", () => {
         const user = users.find((u) => u.id == socket.id);
@@ -103,13 +218,24 @@ io.on("connection", (socket) => {
     // 接続が切れた場合
     socket.on("disconnect", () => {
         const user = users.find((u) => u.id == socket.id);
+        if (!user) {
+            // userデータがないときは未入室なので何もせず終了
+            return;
+        }
         const roomIndex = rooms.findIndex((r) => r.id == user.roomId);
+        if (roomIndex === -1) {
+            // roomが見つからない場合も何もせず終了
+            return;
+        }
         const room = rooms[roomIndex];
         if (room.users.length === 1) {
             // userデータがないときは未入室なので何もせず終了
             return;
         }
         const userIndex = room.users.findIndex((u) => u.id == socket.id);
+        if (userIndex === -1) {
+            return;
+        }
         // ターンプレイヤーの場合、次のユーザーに進める
         if (userIndex == room.turnUserIndex) {
             rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
