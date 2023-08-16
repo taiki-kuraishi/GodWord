@@ -41,6 +41,7 @@
       <!-- 入力欄 -->
       <div v-else>
         <div>{{ turnUserName }}さんのターン:</div>
+        <div>現在のターン : {{ turn }}/15 ターン</div>
 
         <!-- <input type="text" v-model="input" />
         <input type="button" value="送信" @click="postWord" /> -->
@@ -49,6 +50,9 @@
       <!-- 入力履歴 -->
       <div v-for="(post, i) in posts" :key="i">
         <div>{{ post.userName }} : " {{ post.word }} "</div>
+      </div>
+      <div v-for="(point, i) in points" :key="i">
+        <div>{{ point.userName }} : " {{ point.point }} "ポイント</div>
       </div>
 
       <!-- カード -->
@@ -60,13 +64,8 @@
       <input type="text" v-model="collectText" readonly />
       <!-- delete_button -->
       <input type="button" value="1文字消す" @click="pop_collect" />
-      <p>{{ cards }}</p>
-      <p>{{ collectArray }}</p>
 
       <!-- ボタン -->
-      <!-- <p>{{ cards[0].card }}</p>
-      <p>{{ userName }}</p>
-      <p>{{ cards[0].userName }}</p> -->
       <div v-for="(card, i) in cards" :key="i">
         <div v-if="card.userName == userName">
           <!-- <p>{{ card }}</p> -->
@@ -108,11 +107,13 @@ export default {
     roomId: "",
     message: "",
     input: "",
+    turn: 0,
     turnUserName: "",
     posts: [],
     cards: [],
     collectArray: [],
     collectText: [],
+    points: [],
     action: -1,
     isGameOver: false,
     socket: io("http://localhost:3031"),
@@ -129,9 +130,11 @@ export default {
       this.isJoined = true;
       this.roomId = room.id;
       this.message = "";
+      this.turn = room.turn;
       this.turnUserName = room.users[room.turnUserIndex].name;
       this.posts = room.posts;
       this.cards = room.cards;
+      this.points = room.points;
       this.actions = -1;
       (this.collectArray = []), (this.collectText = []), (this.input = "");
       this.isGameOver = room.isGameOver;

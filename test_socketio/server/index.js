@@ -34,7 +34,8 @@ const io = new Server(http, {
 const rooms = [];
 const users = [];
 
-
+const TURN = 15;
+const ROUND = 3;
 
 io.on("connection", (socket) => {
     // 部屋を新しく建てる
@@ -49,11 +50,15 @@ io.on("connection", (socket) => {
         const room = {
             id: roomId,
             users: [user],
+            turn: 0,
             turnUserIndex: 0,
             posts: [],
             deck: server_deck,
             cards: [
                 { userName: userName, card: [] },
+            ],
+            points: [
+                { userName: userName, point: 0 }
             ],
         };
         rooms.push(room);
@@ -137,6 +142,9 @@ io.on("connection", (socket) => {
         // ターンプレイヤーを次のユーザーに進める
         rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
 
+        //turnを進める
+        rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
+
         //roomの更新
         io.in(room.id).emit("updateRoom", room);
     });
@@ -158,10 +166,9 @@ io.on("connection", (socket) => {
         }
         // 既存の連想配列を検索してuserNameが一致するcardを探す
         const targetCardIndex = rooms[roomIndex].cards.findIndex((c) => c.userName === user.name);
-        console.log(rooms[roomIndex].cards)
-        // 該当するカードが見つかった場合、そのカードにdraw_cardを追加
+
+        // 該当するカードが見つかった場合、そのカードにdouble_textを追加
         rooms[roomIndex].cards[targetCardIndex].card.push(double_text);
-        console.log(rooms[roomIndex].cards)
 
         //sort cards
         rooms[roomIndex].cards[targetCardIndex].card.sort();
@@ -169,8 +176,12 @@ io.on("connection", (socket) => {
         // ターンプレイヤーを次のユーザーに進める
         rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
 
+        //turnを進める
+        rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
+
         //roomの更新
         io.in(room.id).emit("updateRoom", room);
+        console.log(room);
     });
 
     socket.on('action_collect', async (collect) => {
@@ -195,12 +206,13 @@ io.on("connection", (socket) => {
 
             if (result_1.rows[0]) {
                 console.log("データが存在します。");
+                //提出したtextの削除
                 for (let i = rooms[roomIndex].cards[targetCardIndex].card.length - 1; i >= 0; i--) {
                     if (collect.includes(rooms[roomIndex].cards[targetCardIndex].card[i])) {
                         rooms[roomIndex].cards[targetCardIndex].card.splice(i, 1);
                     }
                 }
-                rooms[roomIndex].cards[targetCardIndex].card.sort();
+                rooms[roomIndex].points[targetCardIndex].point = rooms[roomIndex].points[targetCardIndex].point + collect.length;
             } else {
                 console.log("データは存在しません。");
                 io.to(socket.id).emit("notifyError", "データは存在しません");
@@ -214,6 +226,10 @@ io.on("connection", (socket) => {
         // ターンプレイヤーを次のユーザーに進める
         rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
 
+        //turnを進める
+        rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
+
+        //roomの更新
         io.in(room.id).emit("updateRoom", room);
         io.to(socket.id).emit("notifyError", "正解");
     });
