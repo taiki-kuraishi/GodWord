@@ -46,14 +46,14 @@ io.on("connection", (socket) => {
         }
         const roomId = generateRoomId();
         const user = { id: socket.id, name: userName, roomId };
-        const server_deck = new Deck(1)
         const room = {
             id: roomId,
             users: [user],
             turn: 0,
+            round: 0,
             turnUserIndex: 0,
             posts: [],
-            deck: server_deck,
+            deck: new Deck(1),
             cards: [
                 { userName: userName, card: [] },
             ],
@@ -81,6 +81,7 @@ io.on("connection", (socket) => {
         const user = { id: socket.id, name: userName, roomId };
         rooms[roomIndex].users.push(user);
         rooms[roomIndex].cards.unshift({ userName: user.name, card: [] });
+        rooms[roomIndex].points.unshift({ userName: user.name, point: 0 });
         users.push(user);
         socket.join(rooms[roomIndex].id);
         io.to(socket.id).emit("updateRoom", rooms[roomIndex]);
@@ -114,6 +115,7 @@ io.on("connection", (socket) => {
         // ターンプレイヤーを次のユーザーに進める
         rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
 
+        //roomの更新
         io.in(room.id).emit("updateRoom", room);
     });
 
@@ -142,8 +144,30 @@ io.on("connection", (socket) => {
         // ターンプレイヤーを次のユーザーに進める
         rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
 
-        //turnを進める
-        rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
+        //ターンとラウンドの管理
+        if (rooms[roomIndex].turn < TURN) {
+            //turnを進める
+            rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
+        } else {
+            //turnの初期化
+            rooms[roomIndex].turn = 0;
+            //roundの管理
+            if (rooms[roomIndex].round < ROUND) {
+                //roundを進める
+                rooms[roomIndex].round = rooms[roomIndex].round + 1;
+
+                //デッキの初期化
+                rooms[roomIndex].deck = new Deck(1);
+
+                //手札の初期化
+                for (var i = 0; i < rooms[roomIndex].cards.length; i++) {
+                    rooms[roomIndex].cards[i].card = [];
+                }
+            } else {
+                //gameの終了
+                rooms[roomIndex].isGameOver = true;
+            }
+        }
 
         //roomの更新
         io.in(room.id).emit("updateRoom", room);
@@ -178,6 +202,31 @@ io.on("connection", (socket) => {
 
         //turnを進める
         rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
+
+        //ターンとラウンドの管理
+        if (rooms[roomIndex].turn < TURN) {
+            //turnを進める
+            rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
+        } else {
+            //turnの初期化
+            rooms[roomIndex].turn = 0;
+            //roundの管理
+            if (rooms[roomIndex].round < ROUND) {
+                //roundを進める
+                rooms[roomIndex].round = rooms[roomIndex].round + 1;
+
+                //デッキの初期化
+                rooms[roomIndex].deck = new Deck(1);
+
+                //手札の初期化
+                for (var i = 0; i < rooms[roomIndex].cards.length; i++) {
+                    rooms[roomIndex].cards[i].card = [];
+                }
+            } else {
+                //gameの終了
+                rooms[roomIndex].isGameOver = true;
+            }
+        }
 
         //roomの更新
         io.in(room.id).emit("updateRoom", room);
@@ -229,6 +278,31 @@ io.on("connection", (socket) => {
         //turnを進める
         rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
 
+        //ターンとラウンドの管理
+        if (rooms[roomIndex].turn < TURN) {
+            //turnを進める
+            rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
+        } else {
+            //turnの初期化
+            rooms[roomIndex].turn = 0;
+            //roundの管理
+            if (rooms[roomIndex].round < ROUND) {
+                //roundを進める
+                rooms[roomIndex].round = rooms[roomIndex].round + 1;
+
+                //デッキの初期化
+                rooms[roomIndex].deck = new Deck(1);
+
+                //手札の初期化
+                for (var i = 0; i < rooms[roomIndex].cards.length; i++) {
+                    rooms[roomIndex].cards[i].card = [];
+                }
+            } else {
+                //gameの終了
+                rooms[roomIndex].isGameOver = true;
+            }
+        }
+
         //roomの更新
         io.in(room.id).emit("updateRoom", room);
         io.to(socket.id).emit("notifyError", "正解");
@@ -241,6 +315,15 @@ io.on("connection", (socket) => {
         const roomIndex = rooms.findIndex((r) => r.id == user.roomId);
         const room = rooms[roomIndex];
         rooms[roomIndex].posts.length = 0;
+
+        //デッキの初期化
+        rooms[roomIndex].deck = new Deck(1);
+
+        //手札の初期化
+        for (var i = 0; i < rooms[roomIndex].cards.length; i++) {
+            rooms[roomIndex].cards[i].card = [];
+        }
+
         rooms[roomIndex].isGameOver = false;
 
         io.in(room.id).emit("updateRoom", room);
@@ -255,7 +338,8 @@ io.on("connection", (socket) => {
         rooms[roomIndex].isGameOver = true;
         // console.log(rooms[roomIndex]);
         io.in(room.id).emit("updateRoom", room);
-    })
+    });
+
     // 接続が切れた場合
     socket.on("disconnect", () => {
         const user = users.find((u) => u.id == socket.id);

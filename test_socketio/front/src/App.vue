@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <!-- ---------- HEAD ---------- -->
     <h5>test socket.io</h5>
     <!-- 入室済の場合、部屋の情報を表示 -->
     <div v-if="isJoined">
@@ -29,68 +30,72 @@
     </div>
 
     <hr />
+    <!-- ---------- Body ---------- -->
 
     <!-- しりとり表示 -->
     <div v-if="isJoined">
       <!-- ゲームオーバー時の表示 -->
       <div v-if="isGameOver">
-        <div style="color: red">{{ posts[0].userName }} さんの負け</div>
+        <!-- <div style="color: red">{{ posts[0].userName }} さんの負け</div> -->
+        <div v-for="(point, i) in points" :key="i">
+          <div>{{ point.userName }} : " {{ point.point }} "ポイント</div>
+        </div>
         <input type="button" value="最初から" @click="restart" />
       </div>
 
       <!-- 入力欄 -->
       <div v-else>
         <div>{{ turnUserName }}さんのターン:</div>
+        <div>現在のラウンド : {{ round }}/5 ラウンド</div>
         <div>現在のターン : {{ turn }}/15 ターン</div>
 
         <!-- <input type="text" v-model="input" />
         <input type="button" value="送信" @click="postWord" /> -->
-      </div>
-
-      <!-- 入力履歴 -->
-      <div v-for="(post, i) in posts" :key="i">
-        <div>{{ post.userName }} : " {{ post.word }} "</div>
-      </div>
-      <div v-for="(point, i) in points" :key="i">
-        <div>{{ point.userName }} : " {{ point.point }} "ポイント</div>
-      </div>
-
-      <!-- カード -->
-      <div v-for="(card, i) in cards" :key="i">
-        <div>{{ card.userName }} : " {{ card.card }} "</div>
-      </div>
-
-      <!-- collect_input_box -->
-      <input type="text" v-model="collectText" readonly />
-      <!-- delete_button -->
-      <input type="button" value="1文字消す" @click="pop_collect" />
-
-      <!-- ボタン -->
-      <div v-for="(card, i) in cards" :key="i">
-        <div v-if="card.userName == userName">
-          <!-- <p>{{ card }}</p> -->
-          <input
-            v-for="(btn, i) in card.card"
-            :key="i"
-            type="button"
-            :value="btn"
-            v-bind:disabled="active_button(btn, i)"
-            @click="selectButton(btn, i)"
-            style="display: inline-block; margin-right: 10px"
-          />
+        <!-- 入力履歴 -->
+        <div v-for="(post, i) in posts" :key="i">
+          <div>{{ post.userName }} : " {{ post.word }} "</div>
         </div>
-      </div>
+        <div v-for="(point, i) in points" :key="i">
+          <div>{{ point.userName }} : " {{ point.point }} "ポイント</div>
+        </div>
 
-      <!-- action -->
-      <div>
-        <input type="button" value="ドロー" @click="action_draw" />
-        <input type="button" value="2倍" @click="action_double" />
-        <input type="button" value="提出" @click="action_collect" />
-      </div>
+        <!-- カード -->
+        <div v-for="(card, i) in cards" :key="i">
+          <div>{{ card.userName }} : " {{ card.card }} "</div>
+        </div>
 
-      <!-- 終了ボタン -->
-      <div>
-        <input type="button" value="終了" @click="exit" />
+        <!-- collect_input_box -->
+        <input type="text" v-model="collectText" readonly />
+        <!-- delete_button -->
+        <input type="button" value="1文字消す" @click="pop_collect" />
+
+        <!-- ボタン -->
+        <div v-for="(card, i) in cards" :key="i">
+          <div v-if="card.userName == userName">
+            <!-- <p>{{ card }}</p> -->
+            <input
+              v-for="(btn, i) in card.card"
+              :key="i"
+              type="button"
+              :value="btn"
+              v-bind:disabled="active_button(btn, i)"
+              @click="selectButton(btn, i)"
+              style="display: inline-block; margin-right: 10px"
+            />
+          </div>
+        </div>
+
+        <!-- action -->
+        <div>
+          <input type="button" value="ドロー" @click="action_draw" />
+          <input type="button" value="2倍" @click="action_double" />
+          <input type="button" value="提出" @click="action_collect" />
+        </div>
+
+        <!-- 終了ボタン -->
+        <div>
+          <input type="button" value="終了" @click="exit" />
+        </div>
       </div>
     </div>
   </div>
@@ -108,6 +113,7 @@ export default {
     message: "",
     input: "",
     turn: 0,
+    round: 0,
     turnUserName: "",
     posts: [],
     cards: [],
@@ -131,6 +137,7 @@ export default {
       this.roomId = room.id;
       this.message = "";
       this.turn = room.turn;
+      this.round = room.round;
       this.turnUserName = room.users[room.turnUserIndex].name;
       this.posts = room.posts;
       this.cards = room.cards;
