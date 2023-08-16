@@ -34,10 +34,10 @@ const io = new Server(http, {
 const rooms = [];
 const users = [];
 
-const TURN = 30;
+const TURN = 15;
 const ROUND = 3;
 
-const EXODIA = ['1','2','3','4','5','6','7','8','9'];
+const EXODIA = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
 io.on("connection", (socket) => {
     // 部屋を新しく建てる
@@ -144,13 +144,13 @@ io.on("connection", (socket) => {
         console.log(rooms[roomIndex].cards[targetCardIndex].card)
         console.log(EXODIA)
         //EXODIA
-        if (EXODIA.every(card => rooms[roomIndex].cards[targetCardIndex].card.includes(card))){
+        if (EXODIA.every(card => rooms[roomIndex].cards[targetCardIndex].card.includes(card))) {
             console.log('EXODIA')
             exodia_flg = true;
             //point加算
             rooms[roomIndex].points[targetCardIndex].point = rooms[roomIndex].points[targetCardIndex].point + 100;
             //turn 終了
-            rooms[roomIndex].turn =TURN;
+            rooms[roomIndex].turn = TURN;
         }
 
         //sort cards
@@ -187,7 +187,7 @@ io.on("connection", (socket) => {
         //roomの更新
         io.in(room.id).emit("updateRoom", room);
 
-        if(exodia_flg){
+        if (exodia_flg) {
             io.to(socket.id).emit("notifyError", "EXODIA");
         }
     });
