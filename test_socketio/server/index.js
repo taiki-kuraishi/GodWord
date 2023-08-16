@@ -34,8 +34,10 @@ const io = new Server(http, {
 const rooms = [];
 const users = [];
 
-const TURN = 15;
+const TURN = 30;
 const ROUND = 3;
+
+const EXODIA = ['1','2','3','4','5','6','7','8','9'];
 
 io.on("connection", (socket) => {
     // 部屋を新しく建てる
@@ -122,6 +124,7 @@ io.on("connection", (socket) => {
     //action
     //ドロー
     socket.on('action_draw', () => {
+        var exodia_flg = false;
         // 送信したuser
         const user = users.find((u) => u.id == socket.id);
         // ルームのインデックス
@@ -137,6 +140,18 @@ io.on("connection", (socket) => {
 
         // 該当するカードが見つかった場合、そのカードにdraw_cardを追加
         rooms[roomIndex].cards[targetCardIndex].card = rooms[roomIndex].cards[targetCardIndex].card.concat(rooms[roomIndex].deck.getCard(3));
+
+        console.log(rooms[roomIndex].cards[targetCardIndex].card)
+        console.log(EXODIA)
+        //EXODIA
+        if (EXODIA.every(card => rooms[roomIndex].cards[targetCardIndex].card.includes(card))){
+            console.log('EXODIA')
+            exodia_flg = true;
+            //point加算
+            rooms[roomIndex].points[targetCardIndex].point = rooms[roomIndex].points[targetCardIndex].point + 100;
+            //turn 終了
+            rooms[roomIndex].turn =TURN;
+        }
 
         //sort cards
         rooms[roomIndex].cards[targetCardIndex].card.sort();
@@ -171,6 +186,10 @@ io.on("connection", (socket) => {
 
         //roomの更新
         io.in(room.id).emit("updateRoom", room);
+
+        if(exodia_flg){
+            io.to(socket.id).emit("notifyError", "EXODIA");
+        }
     });
 
     socket.on('action_double', (double_text) => {
@@ -261,6 +280,7 @@ io.on("connection", (socket) => {
                         rooms[roomIndex].cards[targetCardIndex].card.splice(i, 1);
                     }
                 }
+                //point加算
                 rooms[roomIndex].points[targetCardIndex].point = rooms[roomIndex].points[targetCardIndex].point + collect.length;
             } else {
                 console.log("データは存在しません。");
