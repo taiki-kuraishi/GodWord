@@ -113,7 +113,67 @@ io.on("connection", (socket) => {
     });
 
     //action
-    socket.on("action", async (query, collect = null) => {
+    //ドロー
+    socket.on('action_draw', () => {
+        // 送信したuser
+        const user = users.find((u) => u.id == socket.id);
+        // ルームのインデックス
+        const roomIndex = rooms.findIndex((r) => r.id == user.roomId);
+        const room = rooms[roomIndex];
+        // ターンプレイヤーかチェック
+        if (room.users[room.turnUserIndex].id != socket.id) {
+            io.to(socket.id).emit("notifyError", "あなたのターンではありません");
+            return;
+        }
+        // 既存の連想配列を検索してuserNameが一致するcardを探す
+        const targetCardIndex = rooms[roomIndex].cards.findIndex((c) => c.userName === user.name);
+
+        // 該当するカードが見つかった場合、そのカードにdraw_cardを追加
+        rooms[roomIndex].cards[targetCardIndex].card = rooms[roomIndex].cards[targetCardIndex].card.concat(rooms[roomIndex].deck.getCard(3));
+
+        //sort cards
+        rooms[roomIndex].cards[targetCardIndex].card.sort();
+
+        // ターンプレイヤーを次のユーザーに進める
+        rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
+
+        //roomの更新
+        io.in(room.id).emit("updateRoom", room);
+    });
+
+    socket.on('action_double', (double_text) => {
+        //inputの長さのチェック 1文字以上　1文字以下だったら return
+        if (double_text.length !== 1) {
+            return
+        }
+        // 送信したuser
+        const user = users.find((u) => u.id == socket.id);
+        // ルームのインデックス
+        const roomIndex = rooms.findIndex((r) => r.id == user.roomId);
+        const room = rooms[roomIndex];
+        // ターンプレイヤーかチェック
+        if (room.users[room.turnUserIndex].id != socket.id) {
+            io.to(socket.id).emit("notifyError", "あなたのターンではありません");
+            return;
+        }
+        // 既存の連想配列を検索してuserNameが一致するcardを探す
+        const targetCardIndex = rooms[roomIndex].cards.findIndex((c) => c.userName === user.name);
+        console.log(rooms[roomIndex].cards)
+        // 該当するカードが見つかった場合、そのカードにdraw_cardを追加
+        rooms[roomIndex].cards[targetCardIndex].card.push(double_text);
+        console.log(rooms[roomIndex].cards)
+
+        //sort cards
+        rooms[roomIndex].cards[targetCardIndex].card.sort();
+
+        // ターンプレイヤーを次のユーザーに進める
+        rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
+
+        //roomの更新
+        io.in(room.id).emit("updateRoom", room);
+    });
+
+    socket.on('action_collect', async (collect) => {
         // 送信したuser
         const user = users.find((u) => u.id == socket.id);
         // ルームのインデックス
@@ -125,72 +185,37 @@ io.on("connection", (socket) => {
             return;
         }
 
-        //action
-        //ドロー
         // 既存の連想配列を検索してuserNameが一致するcardを探す
         const targetCardIndex = rooms[roomIndex].cards.findIndex((c) => c.userName === user.name);
-        if (query === 0) {
-            if (targetCardIndex !== -1) {
-                // 該当するカードが見つかった場合、そのカードにdraw_cardを追加
-                rooms[roomIndex].cards[targetCardIndex].card = rooms[roomIndex].cards[targetCardIndex].card.concat(rooms[roomIndex].deck.getCard(3));
-            } else {
-                // 該当するカードが見つからなかった場合、新しいカードとして連想配列に追加
-                rooms[roomIndex].cards.unshift({
-                    userName: user.name,
-                    card: rooms[roomIndex].deck.getCard(3)
-                });
-            }
-            //sort cards
-            rooms[roomIndex].cards[targetCardIndex].card.sort();
-        }
-        //2倍
-        else if (query === 1) {
 
-        }
-        //提出
-        else if (query === 2) {
-            try {
-                const query_1 = `select * from godwordtable where title = '${collect}';`;
-                const result_1 = await client.query(query_1);
+        //DB access
+        try {
+            const query_1 = `select * from godwordtable where title = '${collect}';`;
+            const result_1 = await client.query(query_1);
 
-                if (result_1.rows[0]) {
-                    console.log("データが存在します。");
-                    for (let i = rooms[roomIndex].cards[targetCardIndex].card.length - 1; i >= 0; i--) {
-                        if (collect.includes(rooms[roomIndex].cards[targetCardIndex].card[i])) {
-                            rooms[roomIndex].cards[targetCardIndex].card.splice(i, 1);
-                        }
+            if (result_1.rows[0]) {
+                console.log("データが存在します。");
+                for (let i = rooms[roomIndex].cards[targetCardIndex].card.length - 1; i >= 0; i--) {
+                    if (collect.includes(rooms[roomIndex].cards[targetCardIndex].card[i])) {
+                        rooms[roomIndex].cards[targetCardIndex].card.splice(i, 1);
                     }
-                    rooms[roomIndex].cards[targetCardIndex].card.sort();
-                } else {
-                    console.log("データは存在しません。");
-                    io.to(socket.id).emit("notifyError", "データは存在しません");
-                    return
                 }
-            } catch (err) {
-                console.error('Error querying database:', err);
+                rooms[roomIndex].cards[targetCardIndex].card.sort();
+            } else {
+                console.log("データは存在しません。");
+                io.to(socket.id).emit("notifyError", "データは存在しません");
                 return
             }
-        }
-        //例外処理
-        else {
+        } catch (err) {
+            console.error('Error querying database:', err);
             return
         }
-
-        // console.log(draw_card);
-        console.log(room);
-        // console.log(rooms[roomIndex]);
-        // console.log("cards:", rooms[roomIndex].cards);
-        console.log(rooms[roomIndex].deck.cards);
-        console.log(rooms[roomIndex].cards)
-        // console.log(rooms[roomIndex].deck.getCard(3));
 
         // ターンプレイヤーを次のユーザーに進める
         rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
 
         io.in(room.id).emit("updateRoom", room);
-        if (query === 2) {
-            io.to(socket.id).emit("notifyError", "正解");
-        }
+        io.to(socket.id).emit("notifyError", "正解");
     });
 
 

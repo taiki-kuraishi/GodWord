@@ -133,9 +133,7 @@ export default {
       this.posts = room.posts;
       this.cards = room.cards;
       this.actions = -1;
-      this.collectArray = [],
-      this.collectText = [],
-      this.input = "";
+      (this.collectArray = []), (this.collectText = []), (this.input = "");
       this.isGameOver = room.isGameOver;
     });
 
@@ -179,19 +177,19 @@ export default {
 
     //ドロー
     action_draw() {
-      this.socket.emit("action", 0);
+      this.socket.emit("action_draw");
       this.message = "";
     },
 
     //2倍
     action_double() {
-      this.socket.emit("action", 1);
+      this.socket.emit("action_double", this.collectText);
       this.message = "";
     },
 
     //提出
     action_collect() {
-      this.socket.emit("action", 2, this.collectText);
+      this.socket.emit("action_collect", this.collectText);
       this.message = "";
     },
 
