@@ -53,7 +53,7 @@ io.on("connection", (socket) => {
             posts: [],
             deck: server_deck,
             cards: [
-                { userName: userName, card: [], index: [] },
+                { userName: userName, card: [] },
             ],
         };
         rooms.push(room);
@@ -127,24 +127,17 @@ io.on("connection", (socket) => {
 
         //action
         //ドロー
+        // 既存の連想配列を検索してuserNameが一致するcardを探す
+        const targetCardIndex = rooms[roomIndex].cards.findIndex((c) => c.userName === user.name);
         if (query === 0) {
-            // 既存の連想配列を検索してuserNameが一致するcardを探す
-            const targetCardIndex = rooms[roomIndex].cards.findIndex((c) => c.userName === user.name);
-
             if (targetCardIndex !== -1) {
                 // 該当するカードが見つかった場合、そのカードにdraw_cardを追加
                 rooms[roomIndex].cards[targetCardIndex].card = rooms[roomIndex].cards[targetCardIndex].card.concat(rooms[roomIndex].deck.getCard(3));
-                const indexArray = [];
-                for (var i = 0; i <= rooms[roomIndex].cards[targetCardIndex].card.length; i++) {
-                    indexArray.push(i);
-                }
-                rooms[roomIndex].cards[targetCardIndex].index = indexArray
             } else {
                 // 該当するカードが見つからなかった場合、新しいカードとして連想配列に追加
                 rooms[roomIndex].cards.unshift({
                     userName: user.name,
-                    card: rooms[roomIndex].deck.getCard(3),
-                    index: [1, 2, 3],
+                    card: rooms[roomIndex].deck.getCard(3)
                 });
             }
             //sort cards
@@ -162,6 +155,12 @@ io.on("connection", (socket) => {
 
                 if (result_1.rows[0]) {
                     console.log("データが存在します。");
+                    for (let i = rooms[roomIndex].cards[targetCardIndex].card.length - 1; i >= 0; i--) {
+                        if (collect.includes(rooms[roomIndex].cards[targetCardIndex].card[i])) {
+                            rooms[roomIndex].cards[targetCardIndex].card.splice(i, 1);
+                        }
+                    }
+                    rooms[roomIndex].cards[targetCardIndex].card.sort();
                 } else {
                     console.log("データは存在しません。");
                     io.to(socket.id).emit("notifyError", "データは存在しません");
@@ -182,6 +181,7 @@ io.on("connection", (socket) => {
         // console.log(rooms[roomIndex]);
         // console.log("cards:", rooms[roomIndex].cards);
         console.log(rooms[roomIndex].deck.cards);
+        console.log(rooms[roomIndex].cards)
         // console.log(rooms[roomIndex].deck.getCard(3));
 
         // ターンプレイヤーを次のユーザーに進める
