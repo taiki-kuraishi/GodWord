@@ -39,6 +39,8 @@ const ROUND = 3;
 
 const EXODIA = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
+const ROBofTIME = 3;
+
 io.on("connection", (socket) => {
     // 部屋を新しく建てる
     socket.on("create", (userName) => {
@@ -57,7 +59,7 @@ io.on("connection", (socket) => {
             posts: [],
             deck: new Deck(1),
             cards: [
-                { userName: userName, card: [] },
+                { userName: userName, card: [], num: 0 },
             ],
             points: [
                 { userName: userName, point: 0 }
@@ -80,13 +82,15 @@ io.on("connection", (socket) => {
             io.to(socket.id).emit("notifyError", "部屋が見つかりません");
             return;
         }
+        const room = rooms[roomIndex];
         const user = { id: socket.id, name: userName, roomId };
         rooms[roomIndex].users.push(user);
-        rooms[roomIndex].cards.unshift({ userName: user.name, card: [] });
+        rooms[roomIndex].cards.unshift({ userName: user.name, card: [], num: 0 });
         rooms[roomIndex].points.unshift({ userName: user.name, point: 0 });
         users.push(user);
         socket.join(rooms[roomIndex].id);
-        io.to(socket.id).emit("updateRoom", rooms[roomIndex]);
+        // io.to(socket.id).emit("updateRoom", rooms[roomIndex]);
+        io.in(room.id).emit("updateRoom", room);
     });
 
     // しりとりの単語を送信
@@ -140,12 +144,12 @@ io.on("connection", (socket) => {
 
         // 該当するカードが見つかった場合、そのカードにdraw_cardを追加
         rooms[roomIndex].cards[targetCardIndex].card = rooms[roomIndex].cards[targetCardIndex].card.concat(rooms[roomIndex].deck.getCard(3));
+        //カードの枚数を更新
+        rooms[roomIndex].cards[targetCardIndex].num = rooms[roomIndex].cards[targetCardIndex].card.length;
 
-        console.log(rooms[roomIndex].cards[targetCardIndex].card)
-        console.log(EXODIA)
         //EXODIA
         if (EXODIA.every(card => rooms[roomIndex].cards[targetCardIndex].card.includes(card))) {
-            console.log('EXODIA')
+            console.log('EXODIA');
             exodia_flg = true;
             //point加算
             rooms[roomIndex].points[targetCardIndex].point = rooms[roomIndex].points[targetCardIndex].point + 100;
@@ -177,6 +181,7 @@ io.on("connection", (socket) => {
                 //手札の初期化
                 for (var i = 0; i < rooms[roomIndex].cards.length; i++) {
                     rooms[roomIndex].cards[i].card = [];
+                    rooms[roomIndex].cards[i].num = 0;
                 }
             } else {
                 //gameの終了
@@ -193,7 +198,7 @@ io.on("connection", (socket) => {
     });
 
     socket.on('action_double', (double_text) => {
-        //inputの長さのチェック 1文字以上　1文字以下だったら return
+        //inputの長さのチェック 1文字以上 1文字以下だったら return
         if (double_text.length !== 1) {
             return
         }
@@ -240,6 +245,7 @@ io.on("connection", (socket) => {
                 //手札の初期化
                 for (var i = 0; i < rooms[roomIndex].cards.length; i++) {
                     rooms[roomIndex].cards[i].card = [];
+                    rooms[roomIndex].cards[i].num = 0;
                 }
             } else {
                 //gameの終了
@@ -251,6 +257,97 @@ io.on("connection", (socket) => {
         io.in(room.id).emit("updateRoom", room);
         console.log(room);
     });
+
+    socket.on("action_rob", (target_name => {
+        // 送信したuser
+        const user = users.find((u) => u.id == socket.id);
+        // ルームのインデックス
+        const roomIndex = rooms.findIndex((r) => r.id == user.roomId);
+        const room = rooms[roomIndex];
+        // ターンプレイヤーかチェック
+        if (room.users[room.turnUserIndex].id != socket.id) {
+            io.to(socket.id).emit("notifyError", "あなたのターンではありません");
+            return;
+        }
+
+        // 自分のcardを探す
+        const myCardIndex = rooms[roomIndex].cards.findIndex((c) => c.userName === user.name);
+
+        // 奪う相手のcardを探す
+        const targetCardIndex = rooms[roomIndex].cards.findIndex((c) => c.userName === target_name);
+
+         console.log(myCardIndex);
+         console.log(targetCardIndex);
+
+        console.log(rooms[roomIndex].cards[myCardIndex].card);
+        console.log(rooms[roomIndex].cards[targetCardIndex].card);
+
+        //自分の手札と相手の手札からランダムにROBofTIME回取り出す
+        var my_sliced_card = [];
+        var target_sliced_card = [];
+        for (var i = 0; i < ROBofTIME; i++) {
+            //自分のカードからランダムに取り出す
+            var randomIndex = Math.floor(Math.random() * rooms[roomIndex].cards[myCardIndex].card.length);
+            console.log("Random Index:", randomIndex);
+            console.log("Available Cards:", rooms[roomIndex].cards[myCardIndex].card);
+            console.log('my_sliced_card', my_sliced_card);
+            my_sliced_card.push(rooms[roomIndex].cards[myCardIndex].card.splice(randomIndex, 1)[0]);
+            //targetのカードからランダムに取り出す
+            var randomIndex = Math.floor(Math.random() * rooms[roomIndex].cards[targetCardIndex].card.length);
+            console.log("Random Index:", randomIndex);
+            console.log("Available Cards:", rooms[roomIndex].cards[myCardIndex].card);
+            console.log('target_sliced_card', target_sliced_card);
+            target_sliced_card.push(rooms[roomIndex].cards[targetCardIndex].card.splice(randomIndex, 1)[0]);
+
+        }
+        console.log(my_sliced_card);
+        console.log(target_sliced_card);
+
+        console.log(rooms[roomIndex].cards[myCardIndex].card);
+        console.log(rooms[roomIndex].cards[targetCardIndex].card);
+
+        //取り出したカードの交換
+        rooms[roomIndex].cards[myCardIndex].card = rooms[roomIndex].cards[myCardIndex].card.concat(target_sliced_card);
+        rooms[roomIndex].cards[myCardIndex].card.sort();
+
+        rooms[roomIndex].cards[targetCardIndex].card = rooms[roomIndex].cards[targetCardIndex].card.concat(my_sliced_card);
+        rooms[roomIndex].cards[targetCardIndex].card.sort();
+
+
+        // ターンプレイヤーを次のユーザーに進める
+        rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
+
+        //turnを進める
+        rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
+
+        //ターンとラウンドの管理
+        if (rooms[roomIndex].turn < TURN) {
+            //turnを進める
+            rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
+        } else {
+            //turnの初期化
+            rooms[roomIndex].turn = 0;
+            //roundの管理
+            if (rooms[roomIndex].round < ROUND) {
+                //roundを進める
+                rooms[roomIndex].round = rooms[roomIndex].round + 1;
+                //デッキの初期化
+                rooms[roomIndex].deck = new Deck(1);
+                //手札の初期化
+                for (var i = 0; i < rooms[roomIndex].cards.length; i++) {
+                    rooms[roomIndex].cards[i].card = [];
+                    rooms[roomIndex].cards[i].num = 0;
+                }
+            } else {
+                //gameの終了
+                rooms[roomIndex].isGameOver = true;
+            }
+        }
+
+        //roomの更新
+        io.in(room.id).emit("updateRoom", room);
+        io.to(socket.id).emit("notifyError", "奪ったカード : ${target_sliced_card} 奪われたカード : ${my_sliced_card}");
+    }));
 
     socket.on('action_collect', async (collect) => {
         // 送信したuser
@@ -274,12 +371,14 @@ io.on("connection", (socket) => {
 
             if (result_1.rows[0]) {
                 console.log("データが存在します。");
-                //提出したtextの削除
+                //提出したcardの削除
                 for (let i = rooms[roomIndex].cards[targetCardIndex].card.length - 1; i >= 0; i--) {
                     if (collect.includes(rooms[roomIndex].cards[targetCardIndex].card[i])) {
                         rooms[roomIndex].cards[targetCardIndex].card.splice(i, 1);
                     }
                 }
+                //カードの枚数を更新
+                rooms[roomIndex].cards[targetCardIndex].num = rooms[roomIndex].cards[targetCardIndex].card.length;
                 //point加算
                 rooms[roomIndex].points[targetCardIndex].point = rooms[roomIndex].points[targetCardIndex].point + collect.length;
             } else {
@@ -316,6 +415,7 @@ io.on("connection", (socket) => {
                 //手札の初期化
                 for (var i = 0; i < rooms[roomIndex].cards.length; i++) {
                     rooms[roomIndex].cards[i].card = [];
+                    rooms[roomIndex].cards[i].num = 0;
                 }
             } else {
                 //gameの終了
@@ -342,6 +442,7 @@ io.on("connection", (socket) => {
         //手札の初期化
         for (var i = 0; i < rooms[roomIndex].cards.length; i++) {
             rooms[roomIndex].cards[i].card = [];
+            rooms[roomIndex].cards[i].num = 0;
         }
 
         rooms[roomIndex].isGameOver = false;

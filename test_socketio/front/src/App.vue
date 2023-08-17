@@ -89,7 +89,25 @@
         <div>
           <input type="button" value="ドロー" @click="action_draw" />
           <input type="button" value="2倍" @click="action_double" />
+          <input type="button" value="奪う" @click="on_rob" />
           <input type="button" value="提出" @click="action_collect" />
+          <!-- rob menu -->
+          <div v-if="rob">
+            <p>奪う相手を選択してください</p>
+            <div v-for="(card, i) in cards" :key="i">
+              <div v-if="userName != card.userName && my_card_check(userName) && 2 <= cards.length">
+                <input
+                  type="button"
+                  :value="card.userName"
+                  v-bind:disabled="rob_active_user(card.card.length)"
+                  @click="action_rob(card.userName)"
+                  style="display: inline-block; margin-right: 10px"
+                />
+              </div>
+            </div>
+            <input type="button" value="キャンセル" @click="off_rob" />
+          </div>
+          <p>{{card_num}}</p>
         </div>
 
         <!-- 終了ボタン -->
@@ -119,8 +137,8 @@ export default {
     cards: [],
     collectArray: [],
     collectText: [],
+    rob: false,
     points: [],
-    action: -1,
     isGameOver: false,
     socket: io("http://localhost:3031"),
   }),
@@ -142,7 +160,6 @@ export default {
       this.posts = room.posts;
       this.cards = room.cards;
       this.points = room.points;
-      this.actions = -1;
       (this.collectArray = []), (this.collectText = []), (this.input = "");
       this.isGameOver = room.isGameOver;
     });
@@ -195,6 +212,37 @@ export default {
     action_double() {
       this.socket.emit("action_double", this.collectText);
       this.message = "";
+    },
+
+    // rob menu 表示 非表示
+    on_rob() {
+      this.rob = true;
+    },
+
+    off_rob() {
+      this.rob = false;
+    },
+
+    //奪う
+    rob_active_user(num_of_cards) {
+      if (num_of_cards < 3) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+
+    action_rob(target_name) {
+      this.socket.emit("action_rob", target_name);
+      this.message = "";
+    },
+
+    my_card_check(userName){
+      for(var i =1;i<=this.cards.length;i++){
+        if(this.cards[i].userName == userName && 3 <= this.cards[i].card.length){
+          return true;
+        }
+      }
     },
 
     //提出
