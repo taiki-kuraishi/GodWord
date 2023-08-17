@@ -200,6 +200,7 @@ io.on("connection", (socket) => {
     socket.on('action_double', (double_text) => {
         //inputの長さのチェック 1文字以上 1文字以下だったら return
         if (double_text.length !== 1) {
+            io.to(socket.id).emit("notifyError", "2倍にできるのは1文字のみです");
             return
         }
         // 送信したuser
@@ -276,8 +277,8 @@ io.on("connection", (socket) => {
         // 奪う相手のcardを探す
         const targetCardIndex = rooms[roomIndex].cards.findIndex((c) => c.userName === target_name);
 
-         console.log(myCardIndex);
-         console.log(targetCardIndex);
+        console.log(myCardIndex);
+        console.log(targetCardIndex);
 
         console.log(rooms[roomIndex].cards[myCardIndex].card);
         console.log(rooms[roomIndex].cards[targetCardIndex].card);
@@ -346,7 +347,7 @@ io.on("connection", (socket) => {
 
         //roomの更新
         io.in(room.id).emit("updateRoom", room);
-        io.to(socket.id).emit("notifyError", "奪ったカード : ${target_sliced_card} 奪われたカード : ${my_sliced_card}");
+        io.to(socket.id).emit("notifyError", "奪ったカード : " + target_sliced_card.toString() + " 奪われたカード : " + my_sliced_card.toString());
     }));
 
     socket.on('action_collect', async (collect) => {
