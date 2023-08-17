@@ -10,15 +10,20 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 
 import pkg from 'pg';
-const { Client } = pkg;
 
+//環境変数の読み込み
+import dotenv from 'dotenv';
+dotenv.config();
+
+const { Client } = pkg;
 const client = new Client({
-    host: "localhost",
-    port: 5432,
-    user: "postgres",
-    password: "PASSWORD",
-    database: "GodWord"
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE
 });
+//DBへの接続
 client.connect(async (err) => {
     if (err) throw err;
     console.log('PostgreSQL Connected... query: 2');
@@ -27,7 +32,7 @@ client.connect(async (err) => {
 const http = createServer();
 const io = new Server(http, {
     cors: {
-        origin: ["http://localhost:8080"],
+        origin: '*',
     },
 });
 
@@ -128,7 +133,6 @@ io.on("connection", (socket) => {
     //action
     //ドロー
     socket.on('action_draw', () => {
-        var exodia_flg = false;
         // 送信したuser
         const user = users.find((u) => u.id == socket.id);
         // ルームのインデックス
@@ -148,6 +152,7 @@ io.on("connection", (socket) => {
         rooms[roomIndex].cards[targetCardIndex].num = rooms[roomIndex].cards[targetCardIndex].card.length;
 
         //EXODIA
+        var exodia_flg = false;
         if (EXODIA.every(card => rooms[roomIndex].cards[targetCardIndex].card.includes(card))) {
             console.log('EXODIA');
             exodia_flg = true;
@@ -197,6 +202,7 @@ io.on("connection", (socket) => {
         }
     });
 
+    //2倍
     socket.on('action_double', (double_text) => {
         //inputの長さのチェック 1文字以上 1文字以下だったら return
         if (double_text.length !== 1) {
@@ -259,6 +265,7 @@ io.on("connection", (socket) => {
         console.log(room);
     });
 
+    //奪う
     socket.on("action_rob", (target_name => {
         // 送信したuser
         const user = users.find((u) => u.id == socket.id);
@@ -350,6 +357,7 @@ io.on("connection", (socket) => {
         io.to(socket.id).emit("notifyError", "奪ったカード : " + target_sliced_card.toString() + " 奪われたカード : " + my_sliced_card.toString());
     }));
 
+    //提出
     socket.on('action_collect', async (collect) => {
         // 送信したuser
         const user = users.find((u) => u.id == socket.id);
