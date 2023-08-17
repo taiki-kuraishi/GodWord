@@ -94,27 +94,31 @@
           <input type="button" value="提出" @click="action_collect" />
           <!-- rob menu -->
           <div v-if="rob">
-            <div v-if="2 <= cards.length && my_card_check(userName,3) == true">
-              <p>奪う相手を選択してください</p>
-              <div v-for="(card, i) in cards" :key="i">
-                <div v-if="userName != card.userName">
-                  <input
-                    type="button"
-                    :value="card.userName"
-                    v-bind:disabled="rob_active_user(card.card.length)"
-                    @click="action_rob(card.userName)"
-                    style="display: inline-block; margin-right: 10px"
-                  />
+            <div>
+              <div
+                v-if="2 <= cards.length && my_card_check(userName, 3) == true"
+              >
+                <p>奪う相手を選択してください</p>
+                <div v-for="(card, i) in cards" :key="i">
+                  <div v-if="userName != card.userName">
+                    <input
+                      type="button"
+                      :value="card.userName"
+                      v-bind:disabled="rob_active_user(card.card.length)"
+                      @click="action_rob(card.userName)"
+                      style="display: inline-block; margin-right: 10px"
+                    />
+                  </div>
                 </div>
               </div>
+              <div v-else-if="rob && cards.length < 2">
+                <p>奪う相手がいません</p>
+              </div>
+              <div v-else-if="rob && my_card_check(userName, 3) == false">
+                <p>手札の枚数が足りません</p>
+              </div>
+              <input type="button" value="キャンセル" @click="off_rob" />
             </div>
-            <div v-else-if="rob && cards.length < 2">
-              <p>奪う相手がいません</p>
-            </div>
-            <div v-else-if="rob && my_card_check(userName,3) == false">
-              <p>手札の枚数が足りません</p>
-            </div>
-            <input type="button" value="キャンセル" @click="off_rob" />
           </div>
 
           <!-- exchange menu -->
@@ -154,10 +158,10 @@ export default {
     collectArray: [],
     collectText: [],
     rob: false,
-    exchange:false,
+    exchange: false,
     points: [],
     isGameOver: false,
-    socket: io("http://localhost:3031"),
+    socket: io("http://25.9.210.138:3031"),
   }),
 
   created() {
@@ -177,8 +181,6 @@ export default {
       this.posts = room.posts;
       this.cards = room.cards;
       this.points = room.points;
-      this.rob = false;
-      this.exchange = false;
       (this.collectArray = []), (this.collectText = []), (this.input = "");
       this.isGameOver = room.isGameOver;
     });
@@ -257,7 +259,7 @@ export default {
       this.message = "";
     },
 
-    my_card_check(userName,num) {
+    my_card_check(userName, num) {
       for (var i = 1; i <= this.cards.length; i++) {
         if (
           this.cards[i].userName == userName &&
@@ -270,16 +272,14 @@ export default {
     },
 
     //exchange
-    on_exchange(){
+    on_exchange() {
       this.exchange = true;
       this.rob = false;
     },
-    off_exchange(){
-      this.exchange=false;
+    off_exchange() {
+      this.exchange = false;
     },
-    action_exchange(){
-
-    },
+    action_exchange() {},
 
     //提出
     action_collect() {

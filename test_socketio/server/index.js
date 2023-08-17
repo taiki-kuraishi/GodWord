@@ -51,6 +51,7 @@ io.on("connection", (socket) => {
     socket.on("create", (userName) => {
         if (userName == "") {
             io.to(socket.id).emit("notifyError", "名前を入力してください");
+            console.log('\nNo name entered at create');
             return;
         }
         const roomId = generateRoomId();
@@ -64,7 +65,7 @@ io.on("connection", (socket) => {
             posts: [],
             deck: new Deck(1),
             cards: [
-                { userName: userName, card: [], num: 0 },
+                { userName: userName, card: [] },
             ],
             points: [
                 { userName: userName, point: 0 }
@@ -74,28 +75,35 @@ io.on("connection", (socket) => {
         users.push(user);
         socket.join(roomId);
         io.to(socket.id).emit("updateRoom", room);
+
+        console.log('\n<--- create --->\nroom : ', room);
+        console.log('\ncards : \n', room.cards);
     });
 
     // 部屋に入室する
     socket.on("enter", (userName, roomId) => {
         if (userName == "") {
             io.to(socket.id).emit("notifyError", "名前を入力してください");
+            console.log('\nNo name entered at enter')
             return;
         }
         const roomIndex = rooms.findIndex((r) => r.id == roomId);
         if (roomIndex == -1) {
             io.to(socket.id).emit("notifyError", "部屋が見つかりません");
+            console.log('\nNo room found at enter');
             return;
         }
         const room = rooms[roomIndex];
         const user = { id: socket.id, name: userName, roomId };
         rooms[roomIndex].users.push(user);
-        rooms[roomIndex].cards.unshift({ userName: user.name, card: [], num: 0 });
+        rooms[roomIndex].cards.unshift({ userName: user.name, card: [] });
         rooms[roomIndex].points.unshift({ userName: user.name, point: 0 });
         users.push(user);
         socket.join(rooms[roomIndex].id);
-        // io.to(socket.id).emit("updateRoom", rooms[roomIndex]);
         io.in(room.id).emit("updateRoom", room);
+
+        console.log('\n<--- enter --->\nroom : ', room);
+        console.log('\ncards : \n', rooms[roomIndex].cards);
     });
 
     // しりとりの単語を送信
@@ -107,6 +115,7 @@ io.on("connection", (socket) => {
         // ターンプレイヤーかチェック
         if (room.users[room.turnUserIndex].id != socket.id) {
             io.to(socket.id).emit("notifyError", "あなたのターンではありません");
+            console.log('Not your turn at post');
             return;
         }
         // // 正しい入力かチェック
@@ -141,6 +150,7 @@ io.on("connection", (socket) => {
         // ターンプレイヤーかチェック
         if (room.users[room.turnUserIndex].id != socket.id) {
             io.to(socket.id).emit("notifyError", "あなたのターンではありません");
+            console.log('\nNot your turn at action_draw\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user);
             return;
         }
         // 既存の連想配列を検索してuserNameが一致するcardを探す
@@ -154,7 +164,7 @@ io.on("connection", (socket) => {
         //EXODIA
         var exodia_flg = false;
         if (EXODIA.every(card => rooms[roomIndex].cards[targetCardIndex].card.includes(card))) {
-            console.log('EXODIA');
+            console.log('\nEXODIA\n\t', rooms[roomIndex].id, '\n\tuserName : ', user);
             exodia_flg = true;
             //point加算
             rooms[roomIndex].points[targetCardIndex].point = rooms[roomIndex].points[targetCardIndex].point + 100;
@@ -200,23 +210,29 @@ io.on("connection", (socket) => {
         if (exodia_flg) {
             io.to(socket.id).emit("notifyError", "EXODIA");
         }
+
+        console.log('\n<--- action_draw --->\n', room);
+        console.log('\ncards : \n', rooms[roomIndex].cards);
     });
 
     //2倍
     socket.on('action_double', (double_text) => {
-        //inputの長さのチェック 1文字以上 1文字以下だったら return
-        if (double_text.length !== 1) {
-            io.to(socket.id).emit("notifyError", "2倍にできるのは1文字のみです");
-            return
-        }
         // 送信したuser
         const user = users.find((u) => u.id == socket.id);
         // ルームのインデックス
         const roomIndex = rooms.findIndex((r) => r.id == user.roomId);
         const room = rooms[roomIndex];
+
+        //inputの長さのチェック 1文字以上 1文字以下だったら return
+        if (double_text.length !== 1) {
+            io.to(socket.id).emit("notifyError", "2倍にできるのは1文字のみです");
+            console.log('\nOnly one letter can be doubled at action_draw\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user);
+            return
+        }
         // ターンプレイヤーかチェック
         if (room.users[room.turnUserIndex].id != socket.id) {
             io.to(socket.id).emit("notifyError", "あなたのターンではありません");
+            console.log('\nNot your turn at action_draw\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user);
             return;
         }
         // 既存の連想配列を検索してuserNameが一致するcardを探す
@@ -262,7 +278,9 @@ io.on("connection", (socket) => {
 
         //roomの更新
         io.in(room.id).emit("updateRoom", room);
-        console.log(room);
+
+        console.log('\n<--- action_double --->\n', room);
+        console.log('\ncards : \n', rooms[roomIndex].cards);
     });
 
     //奪う
@@ -275,6 +293,7 @@ io.on("connection", (socket) => {
         // ターンプレイヤーかチェック
         if (room.users[room.turnUserIndex].id != socket.id) {
             io.to(socket.id).emit("notifyError", "あなたのターンではありません");
+            console.log('\nNot your turn at action_draw\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user);
             return;
         }
 
@@ -284,36 +303,18 @@ io.on("connection", (socket) => {
         // 奪う相手のcardを探す
         const targetCardIndex = rooms[roomIndex].cards.findIndex((c) => c.userName === target_name);
 
-        console.log(myCardIndex);
-        console.log(targetCardIndex);
-
-        console.log(rooms[roomIndex].cards[myCardIndex].card);
-        console.log(rooms[roomIndex].cards[targetCardIndex].card);
-
         //自分の手札と相手の手札からランダムにROBofTIME回取り出す
         var my_sliced_card = [];
         var target_sliced_card = [];
         for (var i = 0; i < ROBofTIME; i++) {
             //自分のカードからランダムに取り出す
             var randomIndex = Math.floor(Math.random() * rooms[roomIndex].cards[myCardIndex].card.length);
-            console.log("Random Index:", randomIndex);
-            console.log("Available Cards:", rooms[roomIndex].cards[myCardIndex].card);
-            console.log('my_sliced_card', my_sliced_card);
             my_sliced_card.push(rooms[roomIndex].cards[myCardIndex].card.splice(randomIndex, 1)[0]);
             //targetのカードからランダムに取り出す
             var randomIndex = Math.floor(Math.random() * rooms[roomIndex].cards[targetCardIndex].card.length);
-            console.log("Random Index:", randomIndex);
-            console.log("Available Cards:", rooms[roomIndex].cards[myCardIndex].card);
-            console.log('target_sliced_card', target_sliced_card);
             target_sliced_card.push(rooms[roomIndex].cards[targetCardIndex].card.splice(randomIndex, 1)[0]);
 
         }
-        console.log(my_sliced_card);
-        console.log(target_sliced_card);
-
-        console.log(rooms[roomIndex].cards[myCardIndex].card);
-        console.log(rooms[roomIndex].cards[targetCardIndex].card);
-
         //取り出したカードの交換
         rooms[roomIndex].cards[myCardIndex].card = rooms[roomIndex].cards[myCardIndex].card.concat(target_sliced_card);
         rooms[roomIndex].cards[myCardIndex].card.sort();
@@ -355,6 +356,9 @@ io.on("connection", (socket) => {
         //roomの更新
         io.in(room.id).emit("updateRoom", room);
         io.to(socket.id).emit("notifyError", "奪ったカード : " + target_sliced_card.toString() + " 奪われたカード : " + my_sliced_card.toString());
+
+        console.log('\n<--- action_rob --->\n', room);
+        console.log('\ncards : \n', rooms[roomIndex].cards);
     }));
 
     //提出
@@ -367,6 +371,7 @@ io.on("connection", (socket) => {
         // ターンプレイヤーかチェック
         if (room.users[room.turnUserIndex].id != socket.id) {
             io.to(socket.id).emit("notifyError", "あなたのターンではありません");
+            console.log('\nNot your turn at action_draw\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user);
             return;
         }
 
@@ -379,7 +384,7 @@ io.on("connection", (socket) => {
             const result_1 = await client.query(query_1);
 
             if (result_1.rows[0]) {
-                console.log("データが存在します。");
+                console.log('\nData exists in database\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user, '\n\tDB : ', result_1.rows[0]);
                 //提出したcardの削除
                 for (let i = rooms[roomIndex].cards[targetCardIndex].card.length - 1; i >= 0; i--) {
                     if (collect.includes(rooms[roomIndex].cards[targetCardIndex].card[i])) {
@@ -391,8 +396,8 @@ io.on("connection", (socket) => {
                 //point加算
                 rooms[roomIndex].points[targetCardIndex].point = rooms[roomIndex].points[targetCardIndex].point + collect.length;
             } else {
-                console.log("データは存在しません。");
                 io.to(socket.id).emit("notifyError", "データは存在しません");
+                console.log('\nNot exist in the database.\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user);
                 return
             }
         } catch (err) {
@@ -435,6 +440,9 @@ io.on("connection", (socket) => {
         //roomの更新
         io.in(room.id).emit("updateRoom", room);
         io.to(socket.id).emit("notifyError", "正解");
+
+        console.log('\n<--- action_collect --->\n', room);
+        console.log('\ncards : \n', rooms[roomIndex].cards);
     });
 
 
@@ -457,6 +465,9 @@ io.on("connection", (socket) => {
         rooms[roomIndex].isGameOver = false;
 
         io.in(room.id).emit("updateRoom", room);
+
+        console.log('\n<--- action_restart --->\n', room);
+        console.log('\ncards : \n', rooms[roomIndex].cards);
     });
 
     //強制終了ボタン
@@ -468,6 +479,9 @@ io.on("connection", (socket) => {
         rooms[roomIndex].isGameOver = true;
         // console.log(rooms[roomIndex]);
         io.in(room.id).emit("updateRoom", room);
+
+        console.log('\n<--- action_exit --->\n', room);
+        console.log('\ncards : \n', rooms[roomIndex].cards);
     });
 
     // 接続が切れた場合
@@ -510,6 +524,9 @@ io.on("connection", (socket) => {
             user.name,
             room.users[rooms[roomIndex].turnUserIndex].name
         );
+
+        console.log('\n<--- action_disconnect --->\n', room);
+        console.log('\ncards : \n', rooms[roomIndex].cards);
     });
 });
 
@@ -523,25 +540,6 @@ function generateRoomId() {
     return id;
 }
 
-// 入力が不正な値でないかチェック
-function checkWord(word, posts) {
-    // 半角英字でないならNG
-    if (!word.match(/^[a-z]+$/)) {
-        return false;
-    }
-    // 1つ目の単語の場合特にチェックなしでOK
-    if (posts.length == 0) {
-        return true;
-    }
-    // 前の単語の最後の文字から始まってるならOK
-    return word.slice(0, 1) == posts[0].word.slice(-1);
-}
-
-// 終了(xで終わる単語を入力したかどうか)判定
-function checkGameOver(word) {
-    return word.slice(-1) == "x";
-}
-
 // 次のターンプレイヤーのindexを返却
 function getNextTurnUserIndex(room) {
     return room.turnUserIndex == room.users.length - 1
@@ -549,4 +547,4 @@ function getNextTurnUserIndex(room) {
         : room.turnUserIndex + 1;
 }
 
-http.listen(3031);
+http.listen(3031, '25.9.210.138');
