@@ -113,6 +113,8 @@ io.on("connection", (socket) => {
             console.error('Error querying database:', err);
             return
         }
+
+        room.round_title_list.concat(room.title_list.splice(room.title_list.length, -10));
         rooms.push(room);
         users.push(user);
         socket.join(roomId);
