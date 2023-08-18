@@ -38,7 +38,7 @@
       <div v-if="isGameOver">
         <!-- <div style="color: red">{{ posts[0].userName }} さんの負け</div> -->
         <div v-for="(point, i) in points" :key="i">
-          <div>{{ point.userName }} : " {{ point.point }} "ポイント</div>
+          <div>{{ i }} : " {{ point }} "ポイント</div>
         </div>
         <input type="button" value="最初から" @click="restart" />
       </div>
@@ -76,7 +76,7 @@
             :key="i"
             type="button"
             :value="card"
-            v-bind:disabled="active_button(btn, i)"
+            v-bind:disabled="active_button(card, i)"
             @click="selectButton(card, i)"
             style="display: inline-block; margin-right: 10px"
           />
@@ -84,32 +84,38 @@
 
         <!-- action -->
         <div>
-          <input type="button" value="ドロー" @click="action_draw" />
-          <input type="button" value="2倍" @click="action_double" />
-          <input type="button" value="奪う" @click="on_rob" />
-          <input type="button" value="交換" @click="on_exchange" />
-          <input type="button" value="提出" @click="action_collect" />
+          <div>
+            <input type="button" value="ドロー" @click="action_draw" />
+            <input type="button" value="2倍" @click="action_double" />
+            <input type="button" value="奪う" @click="on_rob" />
+            <input type="button" value="交換" @click="on_exchange" />
+            <input type="button" value="提出" @click="action_collect" />
+          </div>
           <!-- rob menu -->
+          {{ Object.keys(cards).length }}
           <div v-if="rob">
             <div>
-              <div v-if="2 <= cards.length && 3 <= numOfCard">
-                <p>奪う相手を選択してください</p>
-                <div v-for="(card, i) in cards" :key="i">
-                  <div v-if="userName != card.userName">
-                    <input
-                      type="button"
-                      :value="card.userName"
-                      v-bind:disabled="rob_active_user(card.card.length)"
-                      @click="action_rob(card.userName)"
-                      style="display: inline-block; margin-right: 10px"
-                    />
-                  </div>
+              <div
+                v-if="
+                  2 <= Object.keys(cards).length && 3 <= cards[userName].length
+                "
+              >
+                <div><p>奪う相手を選択してください</p></div>
+                <div  v-for="(card, i) in cards" :key="i">
+                  <input
+                    v-if="i != userName"
+                    type="button"
+                    :value="i"
+                    v-bind:disabled="rob_active_user(card.length)"
+                    @click="action_rob(i)"
+                    style="display: inline-block; margin-right: 10px"
+                  />
                 </div>
               </div>
-              <div v-else-if="rob && cards.length < 2">
+              <div v-else-if="rob && Object.keys(cards).length < 2">
                 <p>奪う相手がいません</p>
               </div>
-              <div v-else-if="rob && numOfCard < 3">
+              <div v-else-if="rob && cards[userName].length < 3">
                 <p>手札の枚数が足りません</p>
               </div>
               <input type="button" value="キャンセル" @click="off_rob" />
@@ -150,7 +156,6 @@ export default {
     turnUserName: "",
     posts: [],
     cards: {},
-    numOfCard: 0,
     collectArray: [],
     collectText: [],
     rob: false, //true : rob menuの表示, false : rob menuの非表示
@@ -176,7 +181,6 @@ export default {
       this.turnUserName = room.users[room.turnUserIndex].name;
       this.posts = room.posts;
       this.cards = room.cards;
-      this.numOfCard = this.cards[this.userName].length;
       this.points = room.points;
       (this.collectArray = []), (this.collectText = []), (this.input = "");
       this.isGameOver = room.isGameOver;
