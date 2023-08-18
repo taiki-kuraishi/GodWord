@@ -95,9 +95,7 @@
           <!-- rob menu -->
           <div v-if="rob">
             <div>
-              <div
-                v-if="2 <= cards.length && my_card_check(userName, 3) == true"
-              >
+              <div v-if="2 <= cards.length && 3 <= numOfCard">
                 <p>奪う相手を選択してください</p>
                 <div v-for="(card, i) in cards" :key="i">
                   <div v-if="userName != card.userName">
@@ -114,7 +112,7 @@
               <div v-else-if="rob && cards.length < 2">
                 <p>奪う相手がいません</p>
               </div>
-              <div v-else-if="rob && my_card_check(userName, 3) == false">
+              <div v-else-if="rob && numOfCard < 3">
                 <p>手札の枚数が足りません</p>
               </div>
               <input type="button" value="キャンセル" @click="off_rob" />
@@ -144,9 +142,9 @@ import io from "socket.io-client";
 export default {
   name: "App",
   data: () => ({
-    userName: "",
-    joinType: 1,
-    isJoined: false,
+    userName: "",//userName
+    joinType: 1,//1 : でroomの作成 , 2 : roomへの参加
+    isJoined: false,//true : roomへ参加済み, false : roomへ未参加
     roomId: "",
     message: "",
     input: "",
@@ -155,13 +153,14 @@ export default {
     turnUserName: "",
     posts: [],
     cards: [],
+    numOfCard: 0,
     collectArray: [],
     collectText: [],
-    rob: false,
-    exchange: false,
+    rob: false,//true : rob menuの表示, false : rob menuの非表示
+    exchange: false,//true : exchange menuの表示, false : exchange menuの非表示
     points: [],
-    isGameOver: false,
-    socket: io("http://localhost:3031"),
+    isGameOver: false,//true : exchange menuの表示, false : exchange menuの非表示
+    socket: io("http://localhost:3031"),//宛先 hamachiを使用する場合は,hamachiのIPに書き換えたください
   }),
 
   created() {
@@ -180,6 +179,7 @@ export default {
       this.turnUserName = room.users[room.turnUserIndex].name;
       this.posts = room.posts;
       this.cards = room.cards;
+      this.numOfCard = this.cards.find((card) => card.userName === userName).length;
       this.points = room.points;
       (this.collectArray = []), (this.collectText = []), (this.input = "");
       this.isGameOver = room.isGameOver;
@@ -259,18 +259,6 @@ export default {
       this.message = "";
     },
 
-    my_card_check(userName, num) {
-      for (var i = 1; i <= this.cards.length; i++) {
-        if (
-          this.cards[i].userName == userName &&
-          num <= this.cards[i].card.length
-        ) {
-          return true;
-        }
-      }
-      return false;
-    },
-
     //exchange
     on_exchange() {
       this.exchange = true;
@@ -279,6 +267,7 @@ export default {
     off_exchange() {
       this.exchange = false;
     },
+
     action_exchange() {},
 
     //提出
