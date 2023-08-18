@@ -45,8 +45,9 @@ const ROUND = 3;
 const EXODIA = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
 const ROBofTIME = 3;
+const ROUND_TITLE_AMOUNT = 10;
 
-function process_turn(room,userName) {
+function process_turn(room, userName) {
     if (room.turn < TURN) {
         //turnを進める
         room.turn = room.turn + 1;
@@ -67,7 +68,9 @@ function process_turn(room,userName) {
             }
             //round_title_listの初期化
             room.round_title_list = [];
-            room.round_title_list.push(room.title_list.splice(room.title_list.length - 10, room.title_list.length));
+            for (var i = 0; i < ROUND_TITLE_AMOUNT; i++) {
+                room.round_title_list.push(room.title_list.pop());
+            }
         } else {
             //gameの終了
             room.isGameOver = true;
@@ -117,7 +120,10 @@ io.on("connection", (socket) => {
             return
         }
 
-        room.round_title_list.push(room.title_list.splice(room.title_list.length, -10));
+        for (var i = 0; i < ROUND_TITLE_AMOUNT; i++) {
+            room.round_title_list.push(room.title_list.pop());
+        }
+
         rooms.push(room);
         users.push(user);
         socket.join(roomId);
@@ -275,7 +281,7 @@ io.on("connection", (socket) => {
         rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
 
         //ターンとラウンドの管理
-        rooms[roomIndex] = process_turn(rooms[roomIndex],userName);
+        rooms[roomIndex] = process_turn(rooms[roomIndex], userName);
 
         //roomの更新
         io.in(room.id).emit("updateRoom", room);

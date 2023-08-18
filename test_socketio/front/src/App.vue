@@ -100,7 +100,7 @@
                 "
               >
                 <div><p>奪う相手を選択してください</p></div>
-                <div  v-for="(card, i) in cards" :key="i">
+                <div v-for="(card, i) in cards" :key="i">
                   <input
                     v-if="i != userName"
                     type="button"
@@ -129,6 +129,9 @@
           <div v-else></div>
           <p>{{ card_num }}</p>
         </div>
+        <div v-for="(word,i) in round_title_list" :key="i">
+          <p>{{ word }}</p>
+        </div>
 
         <!-- 終了ボタン -->
         <div>
@@ -154,6 +157,7 @@ export default {
     round: 0,
     turnUserName: "",
     posts: [],
+    round_title_list: [],
     cards: {},
     collectArray: [],
     collectText: [],
@@ -179,6 +183,7 @@ export default {
       this.round = room.round;
       this.turnUserName = room.users[room.turnUserIndex].name;
       this.posts = room.posts;
+      this.round_title_list = room.round_title_list;
       this.cards = room.cards;
       this.points = room.points;
       (this.collectArray = []), (this.collectText = []), (this.input = "");
