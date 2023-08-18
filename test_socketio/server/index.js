@@ -48,7 +48,7 @@ const ROBofTIME = 3;
 
 io.on("connection", (socket) => {
     // 部屋を新しく建てる
-    socket.on("create", (userName) => {
+    socket.on("create", async(userName) => {
         if (userName == "") {
             io.to(socket.id).emit("notifyError", "名前を入力してください");
             console.log('\nNo name entered at create');
@@ -63,6 +63,7 @@ io.on("connection", (socket) => {
             round: 0,
             turnUserIndex: 0,
             posts: [],
+            title_list: [],
             deck: new Deck(1),
             cards: [
                 { userName: userName, card: [] },
@@ -74,6 +75,20 @@ io.on("connection", (socket) => {
         rooms.push(room);
         users.push(user);
         socket.join(roomId);
+
+        //DB access
+        try {
+            const query_1 = `select * from godwordtable where title = '${collect}';`;
+            const result_1 = await client.query(query_1);
+
+            for(const row of result_1.rows){
+                title_list.push(row.title);
+            }
+        } catch (err) {
+            console.error('Error querying database:', err);
+            return
+        }
+        
         io.to(socket.id).emit("updateRoom", room);
 
         console.log('\n<--- create --->\nroom : ', room);
