@@ -67,7 +67,7 @@ function process_turn(room,userName) {
             }
             //round_title_listの初期化
             room.round_title_list = [];
-            room.round_title_list.concat(room.title_list.splice(room.title_list.length - 10, room.title_list.length));
+            room.round_title_list.push(room.title_list.splice(room.title_list.length - 10, room.title_list.length));
         } else {
             //gameの終了
             room.isGameOver = true;
@@ -117,7 +117,7 @@ io.on("connection", (socket) => {
             return
         }
 
-        room.round_title_list.concat(room.title_list.splice(room.title_list.length, -10));
+        room.round_title_list.push(room.title_list.splice(room.title_list.length, -10));
         rooms.push(room);
         users.push(user);
         socket.join(roomId);
