@@ -380,28 +380,19 @@ io.on("connection", (socket) => {
         //userNameの取得
         const userName = room.users[room.turnUserIndex].name
 
-        //DB access
-        try {
-            const query_1 = `select * from godwordtable where title = '${collect}';`;
-            const result_1 = await client.query(query_1);
-
-            if (result_1.rows[0]) {
-                console.log('\nData exists in database\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user, '\n\tDB : ', result_1.rows[0]);
-                //提出したcardの削除
-                for (let i = rooms[roomIndex].cards[userName].length - 1; i >= 0; i--) {
-                    if (collect.includes(rooms[roomIndex].cards[userName][i])) {
-                        rooms[roomIndex].cards[userName].splice(i, 1);
-                    }
+        //round_title_listにcollectが存在するか
+        if (rooms[roomIndex].round_title_list.includes(collect)) {
+            console.log('\nData exists in round_title_list\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user, '\n\tcollect : ', collect);
+            for (let i = rooms[roomIndex].cards[userName].length - 1; i >= 0; i--) {
+                if (collect.includes(rooms[roomIndex].cards[userName][i])) {
+                    rooms[roomIndex].cards[userName].splice(i, 1);
                 }
-                //point加算
-                rooms[roomIndex].points[userName] = rooms[roomIndex].points[userName] + collect.length;
-            } else {
-                io.to(socket.id).emit("notifyError", "データは存在しません");
-                console.log('\nNot exist in the database.\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user, '\n\tcollect : ', collect);
-                return
             }
-        } catch (err) {
-            console.error('Error querying database:', err);
+            //point加算
+            rooms[roomIndex].points[userName] = rooms[roomIndex].points[userName] + collect.length;
+        } else {
+            io.to(socket.id).emit("notifyError", "データは存在しません");
+            console.log('\nNot exist in round_title_list\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user, '\n\tcollect : ', collect);
             return
         }
 
