@@ -64,6 +64,7 @@ io.on("connection", (socket) => {
             turnUserIndex: 0,
             posts: [],
             title_list: [],
+            round_title_list;
             deck: new Deck(1),
             cards: {
                 [userName]: []
