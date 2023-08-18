@@ -47,7 +47,7 @@
       <div v-else>
         <div>{{ turnUserName }}さんのターン:</div>
         <div>現在のラウンド : {{ round }}/5 ラウンド</div>
-        <div>現在のターン : {{ turn }}/15 ターン</div>
+        <div>現在のターン : {{ turn }}/{{ turnsPerRound }} ターン</div>
 
         <!-- <input type="text" v-model="input" />
         <input type="button" value="送信" @click="postWord" /> -->
@@ -129,7 +129,7 @@
           <div v-else></div>
           <p>{{ card_num }}</p>
         </div>
-        <div v-for="(word,i) in round_title_list" :key="i">
+        <div v-for="(word, i) in round_title_list" :key="i">
           <p>{{ word }}</p>
         </div>
 
@@ -154,6 +154,7 @@ export default {
     message: "",
     input: "",
     turn: 0,
+    turnsPerRound: 15,
     round: 0,
     turnUserName: "",
     posts: [],
@@ -180,6 +181,7 @@ export default {
       this.roomId = room.id;
       this.message = "";
       this.turn = room.turn;
+      this.turnsPerRound = room.turnsPerRound;
       this.round = room.round;
       this.turnUserName = room.users[room.turnUserIndex].name;
       this.posts = room.posts;

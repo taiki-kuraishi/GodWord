@@ -47,8 +47,8 @@ const EXODIA = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 const ROBofTIME = 3;
 const ROUND_TITLE_AMOUNT = 10;
 
-function process_turn(room, userName) {
-    if (room.turn < TURN * room.users.length) {
+function process_turn(room) {
+    if (room.turn < room.turnsPerRound) {
         //turnを進める
         room.turn = room.turn + 1;
     } else {
@@ -63,8 +63,8 @@ function process_turn(room, userName) {
             room.deck = new Deck(1);
 
             //手札の初期化
-            for (var i = 0; i < room.cards.length; i++) {
-                room.cards[userName] = [];
+            for (var key in room.cards) {
+                room.cards[key] = [];
             }
             //round_title_listの初期化
             room.round_title_list = [];
@@ -93,6 +93,7 @@ io.on("connection", (socket) => {
             id: roomId,
             users: [user],
             turn: 0,
+            turnsPerRound: 15,
             round: 0,
             turnUserIndex: 0,
             posts: [],
@@ -150,11 +151,16 @@ io.on("connection", (socket) => {
         const room = rooms[roomIndex];
         const user = { id: socket.id, name: userName, roomId };
         rooms[roomIndex].users.push(user);
+        console.log(rooms[roomIndex].turnsPerRound)
+        rooms[roomIndex].turnsPerRound = 15 * rooms[roomIndex].users.length;
+        console.log(rooms[roomIndex].turnsPerRound)
         rooms[roomIndex].cards[user.name] = [];
         rooms[roomIndex].points[user.name] = 0;
         users.push(user);
         socket.join(rooms[roomIndex].id);
         io.in(room.id).emit("updateRoom", room);
+
+        io.to(room.id).emit("notifyError", userName + "さんが参加しました。");
 
         console.log('\n<--- enter --->\nroom : ', room);
         console.log('\ncards : \n', rooms[roomIndex].cards);
@@ -232,7 +238,7 @@ io.on("connection", (socket) => {
         rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
 
         //ターンとラウンドの管理
-        rooms[roomIndex] = process_turn(rooms[roomIndex], userName);
+        rooms[roomIndex] = process_turn(rooms[roomIndex]);
 
         //roomの更新
         io.in(room.id).emit("updateRoom", room);
@@ -281,7 +287,7 @@ io.on("connection", (socket) => {
         rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
 
         //ターンとラウンドの管理
-        rooms[roomIndex] = process_turn(rooms[roomIndex], userName);
+        rooms[roomIndex] = process_turn(rooms[roomIndex]);
         //roomの更新
         io.in(room.id).emit("updateRoom", room);
 
@@ -403,7 +409,7 @@ io.on("connection", (socket) => {
         rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
 
         //ターンとラウンドの管理
-        rooms[roomIndex] = process_turn(rooms[roomIndex], userName);
+        rooms[roomIndex] = process_turn(rooms[roomIndex]);
 
         //roomの更新
         io.in(room.id).emit("updateRoom", room);
