@@ -72,23 +72,23 @@ io.on("connection", (socket) => {
                 [userName]: 0
             },
         };
+        //DB access
+        try {
+            const query_1 = `SELECT * FROM godwordtable ORDER BY random() LIMIT 100;`;
+            const result_1 = await client.query(query_1);
+
+            for (const row of result_1.rows) {
+                room.title_list.push(row.title);
+            }
+            console.log(room.title_list);
+        } catch (err) {
+            console.error('Error querying database:', err);
+            return
+        }
         rooms.push(room);
         users.push(user);
         socket.join(roomId);
 
-        //DB access
-        // try {
-        //     const query_1 = `select * from godwordtable where title = '${collect}';`;
-        //     const result_1 = await client.query(query_1);
-
-        //     for(const row of result_1.rows){
-        //         title_list.push(row.title);
-        //     }
-        // } catch (err) {
-        //     console.error('Error querying database:', err);
-        //     return
-        // }
-        
         io.to(socket.id).emit("updateRoom", room);
 
         console.log('\n<--- create --->\nroom : ', room);
