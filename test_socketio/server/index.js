@@ -418,6 +418,15 @@ io.on("connection", (socket) => {
         //userNameの取得
         const userName = room.users[room.turnUserIndex].name
 
+        //文字列を配列に変換
+        const collect_array = Array.from(collect);
+
+        //collect_arrayが手札に存在するか
+        if (!collect_array.every(item => rooms[roomIndex].cards[userName].includes(item))) {
+            console.log('\nNot exist in your hand at action_collect\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user, '\n\tcollect : ', collect);
+            return
+        }
+
         //round_title_listにcollectが存在するか
         if (rooms[roomIndex].round_title_list.includes(collect)) {
             console.log('\nData exists in round_title_list\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user, '\n\tcollect : ', collect);
