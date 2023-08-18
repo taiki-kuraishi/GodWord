@@ -65,6 +65,9 @@ function process_turn(room,userName) {
             for (var i = 0; i < room.cards.length; i++) {
                 room.cards[userName] = [];
             }
+            //round_title_listの初期化
+            room.round_title_list = [];
+            room.round_title_list.concat(room.title_list.splice(room.title_list.length - 10, room.title_list.length));
         } else {
             //gameの終了
             room.isGameOver = true;
