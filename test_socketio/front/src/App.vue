@@ -92,7 +92,6 @@
             <input type="button" value="提出" @click="action_collect" />
           </div>
           <!-- rob menu -->
-          {{ Object.keys(cards).length }}
           <div v-if="rob">
             <div>
               <div

@@ -46,6 +46,33 @@ const EXODIA = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
 const ROBofTIME = 3;
 
+function process_turn(room,userName) {
+    if (room.turn < TURN) {
+        //turnを進める
+        room.turn = room.turn + 1;
+    } else {
+        //turnの初期化
+        room.turn = 0;
+        //roundの管理
+        if (room.round < ROUND) {
+            //roundを進める
+            room.round = room.round + 1;
+
+            //デッキの初期化
+            room.deck = new Deck(1);
+
+            //手札の初期化
+            for (var i = 0; i < room.cards.length; i++) {
+                room.cards[userName] = [];
+            }
+        } else {
+            //gameの終了
+            room.isGameOver = true;
+        }
+    }
+    return room;
+}
+
 io.on("connection", (socket) => {
     // 部屋を新しく建てる
     socket.on("create", async (userName) => {
@@ -194,29 +221,7 @@ io.on("connection", (socket) => {
         rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
 
         //ターンとラウンドの管理
-        if (rooms[roomIndex].turn < TURN) {
-            //turnを進める
-            rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
-        } else {
-            //turnの初期化
-            rooms[roomIndex].turn = 0;
-            //roundの管理
-            if (rooms[roomIndex].round < ROUND) {
-                //roundを進める
-                rooms[roomIndex].round = rooms[roomIndex].round + 1;
-
-                //デッキの初期化
-                rooms[roomIndex].deck = new Deck(1);
-
-                //手札の初期化
-                for (var i = 0; i < rooms[roomIndex].cards.length; i++) {
-                    rooms[roomIndex].cards[userName] = [];
-                }
-            } else {
-                //gameの終了
-                rooms[roomIndex].isGameOver = true;
-            }
-        }
+        rooms[roomIndex] = process_turn(rooms[roomIndex], userName);
 
         //roomの更新
         io.in(room.id).emit("updateRoom", room);
@@ -265,29 +270,7 @@ io.on("connection", (socket) => {
         rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
 
         //ターンとラウンドの管理
-        if (rooms[roomIndex].turn < TURN) {
-            //turnを進める
-            rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
-        } else {
-            //turnの初期化
-            rooms[roomIndex].turn = 0;
-            //roundの管理
-            if (rooms[roomIndex].round < ROUND) {
-                //roundを進める
-                rooms[roomIndex].round = rooms[roomIndex].round + 1;
-
-                //デッキの初期化
-                rooms[roomIndex].deck = new Deck(1);
-
-                //手札の初期化
-                for (var i = 0; i < rooms[roomIndex].cards.length; i++) {
-                    rooms[roomIndex].cards[userName] = [];
-                }
-            } else {
-                //gameの終了
-                rooms[roomIndex].isGameOver = true;
-            }
-        }
+        rooms[roomIndex] = process_turn(rooms[roomIndex],userName);
 
         //roomの更新
         io.in(room.id).emit("updateRoom", room);
@@ -419,29 +402,7 @@ io.on("connection", (socket) => {
         rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
 
         //ターンとラウンドの管理
-        if (rooms[roomIndex].turn < TURN) {
-            //turnを進める
-            rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
-        } else {
-            //turnの初期化
-            rooms[roomIndex].turn = 0;
-            //roundの管理
-            if (rooms[roomIndex].round < ROUND) {
-                //roundを進める
-                rooms[roomIndex].round = rooms[roomIndex].round + 1;
-
-                //デッキの初期化
-                rooms[roomIndex].deck = new Deck(1);
-
-                //手札の初期化
-                for (var i = 0; i < rooms[roomIndex].cards.length; i++) {
-                    rooms[roomIndex].cards[userName] = [];
-                }
-            } else {
-                //gameの終了
-                rooms[roomIndex].isGameOver = true;
-            }
-        }
+        rooms[roomIndex] = process_turn(rooms[roomIndex], userName);
 
         //roomの更新
         io.in(room.id).emit("updateRoom", room);
