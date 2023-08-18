@@ -56,12 +56,12 @@
           <div>{{ post.userName }} : " {{ post.word }} "</div>
         </div>
         <div v-for="(point, i) in points" :key="i">
-          <div>{{ point.userName }} : " {{ point.point }} "ポイント</div>
+          <div>{{ i }} : " {{ point }} "ポイント</div>
         </div>
 
         <!-- カード -->
         <div v-for="(card, i) in cards" :key="i">
-          <div>{{ card.userName }} : " {{ card.card }} "</div>
+          <div>{{ i }} : " {{ card }} "</div>
         </div>
 
         <!-- collect_input_box -->
@@ -69,20 +69,17 @@
         <!-- delete_button -->
         <input type="button" value="1文字消す" @click="pop_collect" />
 
-        <!-- ボタン -->
-        <div v-for="(card, i) in cards" :key="i">
-          <div v-if="card.userName == userName">
-            <!-- <p>{{ card }}</p> -->
-            <input
-              v-for="(btn, i) in card.card"
-              :key="i"
-              type="button"
-              :value="btn"
-              v-bind:disabled="active_button(btn, i)"
-              @click="selectButton(btn, i)"
-              style="display: inline-block; margin-right: 10px"
-            />
-          </div>
+        <!-- 手札ボタン -->
+        <div>
+          <input
+            v-for="(card, i) in cards[userName]"
+            :key="i"
+            type="button"
+            :value="card"
+            v-bind:disabled="active_button(btn, i)"
+            @click="selectButton(card, i)"
+            style="display: inline-block; margin-right: 10px"
+          />
         </div>
 
         <!-- action -->
@@ -142,9 +139,9 @@ import io from "socket.io-client";
 export default {
   name: "App",
   data: () => ({
-    userName: "",//userName
-    joinType: 1,//1 : でroomの作成 , 2 : roomへの参加
-    isJoined: false,//true : roomへ参加済み, false : roomへ未参加
+    userName: "", //userName
+    joinType: 1, //1 : でroomの作成 , 2 : roomへの参加
+    isJoined: false, //true : roomへ参加済み, false : roomへ未参加
     roomId: "",
     message: "",
     input: "",
@@ -152,15 +149,15 @@ export default {
     round: 0,
     turnUserName: "",
     posts: [],
-    cards: [],
+    cards: {},
     numOfCard: 0,
     collectArray: [],
     collectText: [],
-    rob: false,//true : rob menuの表示, false : rob menuの非表示
-    exchange: false,//true : exchange menuの表示, false : exchange menuの非表示
-    points: [],
-    isGameOver: false,//true : exchange menuの表示, false : exchange menuの非表示
-    socket: io("http://localhost:3031"),//宛先 hamachiを使用する場合は,hamachiのIPに書き換えたください
+    rob: false, //true : rob menuの表示, false : rob menuの非表示
+    exchange: false, //true : exchange menuの表示, false : exchange menuの非表示
+    points: {},
+    isGameOver: false, //true : exchange menuの表示, false : exchange menuの非表示
+    socket: io("http://localhost:3031"), //宛先 hamachiを使用する場合は,hamachiのIPに書き換えたください
   }),
 
   created() {
@@ -179,7 +176,7 @@ export default {
       this.turnUserName = room.users[room.turnUserIndex].name;
       this.posts = room.posts;
       this.cards = room.cards;
-      this.numOfCard = this.cards.find((card) => card.userName === userName).length;
+      this.numOfCard = this.cards[this.userName].length;
       this.points = room.points;
       (this.collectArray = []), (this.collectText = []), (this.input = "");
       this.isGameOver = room.isGameOver;
