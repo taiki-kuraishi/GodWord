@@ -48,7 +48,7 @@ const ROBofTIME = 3;
 
 io.on("connection", (socket) => {
     // 部屋を新しく建てる
-    socket.on("create", async(userName) => {
+    socket.on("create", async (userName) => {
         if (userName == "") {
             io.to(socket.id).emit("notifyError", "名前を入力してください");
             console.log('\nNo name entered at create');
@@ -64,7 +64,7 @@ io.on("connection", (socket) => {
             turnUserIndex: 0,
             posts: [],
             title_list: [],
-            round_title_list;
+            round_title_list: [],
             deck: new Deck(1),
             cards: {
                 [userName]: []
