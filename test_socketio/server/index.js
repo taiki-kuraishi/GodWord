@@ -338,29 +338,7 @@ io.on("connection", (socket) => {
         rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
 
         //ターンとラウンドの管理
-        if (rooms[roomIndex].turn < TURN) {
-            //turnを進める
-            rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
-        } else {
-            //turnの初期化
-            rooms[roomIndex].turn = 0;
-            //roundの管理
-            if (rooms[roomIndex].round < ROUND) {
-                //roundを進める
-                rooms[roomIndex].round = rooms[roomIndex].round + 1;
-
-                //デッキの初期化
-                rooms[roomIndex].deck = new Deck(1);
-
-                //手札の初期化
-                for (var i = 0; i < rooms[roomIndex].cards.length; i++) {
-                    rooms[roomIndex].cards[userName] = [];
-                }
-            } else {
-                //gameの終了
-                rooms[roomIndex].isGameOver = true;
-            }
-        }
+        rooms[roomIndex] = process_turn(rooms[roomIndex]);
 
         //roomの更新
         io.in(room.id).emit("updateRoom", room);
@@ -369,6 +347,60 @@ io.on("connection", (socket) => {
         console.log('\n<--- action_rob --->\n', room);
         console.log('\ncards : \n', rooms[roomIndex].cards);
     }));
+
+    //交換
+    socket.on('action_exchange', (collect, char) => {
+        // 送信したuser
+        const user = users.find((u) => u.id == socket.id);
+        // ルームのインデックス
+        const roomIndex = rooms.findIndex((r) => r.id == user.roomId);
+        const room = rooms[roomIndex];
+        // ターンプレイヤーかチェック
+        if (room.users[room.turnUserIndex].id != socket.id) {
+            io.to(socket.id).emit("notifyError", "あなたのターンではありません");
+            console.log('\nNot your turn at action_draw\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user);
+            return;
+        }
+        //userNameの取得
+        const userName = room.users[room.turnUserIndex].name
+
+        //文字列を配列に変換
+        const collect_array = Array.from(collect);
+
+        //collect_arrayが手札に存在するか
+        if (!collect_array.every(item => rooms[roomIndex].cards[userName].includes(item))) {
+            console.log('\nNot exist in your hand at action_exchange\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user, '\n\tcollect : ', collect);
+            return
+        }
+
+        //手札からcollectの削除
+        for (let i = rooms[roomIndex].cards[userName].length - 1; i >= 0; i--) {
+            if (collect.includes(rooms[roomIndex].cards[userName][i])) {
+                rooms[roomIndex].cards[userName].splice(i, 1);
+            }
+        }
+
+        //手札にcharの追加
+        rooms[roomIndex].cards[userName].push(char);
+
+        //手札のsort
+        rooms[roomIndex].cards[userName].sort();
+
+        // ターンプレイヤーを次のユーザーに進める
+        rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
+
+        //turnを進める
+        rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
+
+        //ターンとラウンドの管理
+        rooms[roomIndex] = process_turn(rooms[roomIndex]);
+
+        //roomの更新
+        io.in(room.id).emit("updateRoom", room);
+
+        console.log('\n<--- action_exchange --->\n', room);
+        console.log('\ncards : \n', rooms[roomIndex].cards);
+    });
 
     //提出
     socket.on('action_collect', async (collect) => {
@@ -389,6 +421,7 @@ io.on("connection", (socket) => {
         //round_title_listにcollectが存在するか
         if (rooms[roomIndex].round_title_list.includes(collect)) {
             console.log('\nData exists in round_title_list\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user, '\n\tcollect : ', collect);
+            //手札から提出したカードの削除
             for (let i = rooms[roomIndex].cards[userName].length - 1; i >= 0; i--) {
                 if (collect.includes(rooms[roomIndex].cards[userName][i])) {
                     rooms[roomIndex].cards[userName].splice(i, 1);

@@ -123,8 +123,26 @@
 
           <!-- exchange menu -->
           <div v-else-if="exchange">
-            <p>exchange menu</p>
-            <input type="button" value="キャンセル" @click="off_exchange" />
+            <div>
+              <div v-if="4 <= cards[userName].length">
+                <p>入手したい文字を選んでください</p>
+                <input
+                  v-for="(char, i) in exchange_character_list"
+                  :key="i"
+                  type="button"
+                  :value="char"
+                  @click="action_exchange(char)"
+                  style="display: inline-block; margin-right: 10px"
+                />
+              </div>
+              <div v-if="cards[userName].length < 4">
+                <p>カードの枚数が足りません</p>
+              </div>
+              <div v-if="collectText.length < 4 || 4 < collectText.length">
+                <p>交換するには4文字の入力が必要です</p>
+              </div>
+              <input type="button" value="キャンセル" @click="off_exchange" />
+            </div>
           </div>
           <div v-else></div>
           <p>{{ card_num }}</p>
@@ -164,6 +182,43 @@ export default {
     collectText: [],
     rob: false, //true : rob menuの表示, false : rob menuの非表示
     exchange: false, //true : exchange menuの表示, false : exchange menuの非表示
+    exchange_character_list: [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "a",
+      "b",
+      "c",
+      "d",
+      "e",
+      "f",
+      "g",
+      "h",
+      "i",
+      "j",
+      "k",
+      "l",
+      "m",
+      "o",
+      "p",
+      "q",
+      "r",
+      "s",
+      "t",
+      "u",
+      "v",
+      "w",
+      "x",
+      "y",
+      "z",
+    ],
     points: {},
     isGameOver: false, //true : exchange menuの表示, false : exchange menuの非表示
     socket: io("http://localhost:3031"), //宛先 hamachiを使用する場合は,hamachiのIPに書き換えたください
@@ -275,7 +330,10 @@ export default {
       this.exchange = false;
     },
 
-    action_exchange() {},
+    action_exchange(char) {
+      this.socket.emit("action_exchange", this.collectText, char);
+      this.message = "";
+    },
 
     //提出
     action_collect() {
