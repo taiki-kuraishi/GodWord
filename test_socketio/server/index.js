@@ -397,7 +397,7 @@ io.on("connection", (socket) => {
                 rooms[roomIndex].points[targetCardIndex].point = rooms[roomIndex].points[targetCardIndex].point + collect.length;
             } else {
                 io.to(socket.id).emit("notifyError", "データは存在しません");
-                console.log('\nNot exist in the database.\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user);
+                console.log('\nNot exist in the database.\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user,'\n\tcollect : ',collect);
                 return
             }
         } catch (err) {
@@ -547,4 +547,4 @@ function getNextTurnUserIndex(room) {
         : room.turnUserIndex + 1;
 }
 
-http.listen(3031, '25.9.210.138');
+http.listen(3031);

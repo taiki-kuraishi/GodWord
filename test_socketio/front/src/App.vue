@@ -161,7 +161,7 @@ export default {
     exchange: false,
     points: [],
     isGameOver: false,
-    socket: io("http://25.9.210.138:3031"),
+    socket: io("http://localhost:3031"),
   }),
 
   created() {
