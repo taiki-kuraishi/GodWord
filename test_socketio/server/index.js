@@ -48,7 +48,7 @@ const ROBofTIME = 3;
 const ROUND_TITLE_AMOUNT = 10;
 
 function process_turn(room, userName) {
-    if (room.turn < TURN) {
+    if (room.turn < TURN * room.users.length) {
         //turnを進める
         room.turn = room.turn + 1;
     } else {
@@ -282,7 +282,6 @@ io.on("connection", (socket) => {
 
         //ターンとラウンドの管理
         rooms[roomIndex] = process_turn(rooms[roomIndex], userName);
-
         //roomの更新
         io.in(room.id).emit("updateRoom", room);
 
