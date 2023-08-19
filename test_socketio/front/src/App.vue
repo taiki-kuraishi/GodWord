@@ -297,6 +297,7 @@ export default {
       this.turnUserName = room.users[room.turnUserIndex].name;
       this.posts = room.posts;
       this.round_title_list = room.round_title_list;
+      this.hash_dict = room.hash_dict;
       this.cards = room.cards;
       this.points = room.points;
       (this.collectArray = []), (this.collectText = []), (this.input = "");

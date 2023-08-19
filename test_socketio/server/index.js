@@ -6,6 +6,8 @@
 
 import Deck from './src/deck.mjs';
 
+import CRC32 from 'crc-32';
+
 import { createServer } from "http";
 import { Server } from "socket.io";
 
@@ -68,8 +70,11 @@ function process_turn(room) {
             }
             //round_title_listの初期化
             room.round_title_list = [];
+            room.hash_dict = {};
             for (var i = 0; i < ROUND_TITLE_AMOUNT; i++) {
-                room.round_title_list.push(room.title_list.pop());
+                const popped_title = room.title_list.pop();
+                room.round_title_list.push(popped_title);
+                room.hash_dict[popped_title] = popped_title;
             }
         } else {
             //gameの終了
@@ -77,6 +82,12 @@ function process_turn(room) {
         }
     }
     return room;
+}
+
+//hash
+function calculateCRC32(inputString) {
+    const crcValue = CRC32.str(inputString);
+    return crcValue.toString(36).toLowerCase();
 }
 
 io.on("connection", (socket) => {
@@ -99,6 +110,7 @@ io.on("connection", (socket) => {
             posts: [],
             title_list: [],
             round_title_list: [],
+            hash_dict: {},
             deck: new Deck(1),
             cards: {
                 [userName]: []
@@ -115,15 +127,18 @@ io.on("connection", (socket) => {
             for (const row of result_1.rows) {
                 room.title_list.push(row.title);
             }
-            console.log(room.title_list);
         } catch (err) {
             console.error('Error querying database:', err);
             return
         }
 
+        //round_title_listとhash_dictの生成
         for (var i = 0; i < ROUND_TITLE_AMOUNT; i++) {
-            room.round_title_list.push(room.title_list.pop());
+            const popped_title = room.title_list.pop()
+            room.round_title_list.push(popped_title);
+            room.hash_dict[popped_title] = popped_title;
         }
+        console.log(room.hash_dict);
 
         rooms.push(room);
         users.push(user);
@@ -392,6 +407,42 @@ io.on("connection", (socket) => {
 
         console.log('\n<--- action_exchange --->\n', room);
         console.log('\ncards : \n', rooms[roomIndex].cards);
+    });
+
+    //hash
+    socket.on('action_hash', (index) => {
+        // 送信したuser
+        const user = users.find((u) => u.id == socket.id);
+        // ルームのインデックス
+        const roomIndex = rooms.findIndex((r) => r.id == user.roomId);
+        const room = rooms[roomIndex];
+        // ターンプレイヤーかチェック
+        if (room.users[room.turnUserIndex].id != socket.id) {
+            io.to(socket.id).emit("notifyError", "あなたのターンではありません");
+            console.log('\nNot your turn at action_draw\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user);
+            return;
+        }
+
+        //hash化したものをhash_dictに代入
+        rooms[roomIndex].hash_dict[rooms[roomIndex].round_title_list[index]] = calculateCRC32(rooms[roomIndex].round_title_list[index]);
+
+        // ターンプレイヤーを次のユーザーに進める
+        rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
+
+        //turnを進める
+        rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
+
+        //ターンとラウンドの管理
+        rooms[roomIndex] = process_turn(rooms[roomIndex]);
+
+        //roomの更新
+        io.in(room.id).emit("updateRoom", room);
+        io.to(socket.id).emit("notifyError", "hash化が成功しました : " + rooms[roomIndex].round_title_list[index] + " --> " +  rooms[roomIndex].hash_dict[rooms[roomIndex].round_title_list[index]]);
+
+        console.log('\n<--- action_hash --->\n', room);
+        console.log('\nhash_dict : \n', rooms[roomIndex].hash_dict);
+
+
     });
 
     //提出
