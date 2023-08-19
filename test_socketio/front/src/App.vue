@@ -8,7 +8,7 @@
 
     <!-- 入室済の場合、部屋の情報を表示 -->
     <div v-if="isJoined">
-      <h5>GOD WORD</h5>
+      <h2>GOD WORD</h2>
       <div>{{ userName }} さん</div>
       部屋番号: {{ roomId }}
     </div>
@@ -446,7 +446,7 @@ h1 {
   font-size: 130px;
 }
 
-h5 {
+h2 {
   color: orange;
   font-style: italic;
 }
