@@ -80,7 +80,7 @@
       <!-- 入力欄 -->
       <div v-else>
         <div>{{ turnUserName }}さんのターン:</div>
-        <div>現在のラウンド : {{ round }}/5 ラウンド</div>
+        <div>現在のラウンド : {{ round }}/3 ラウンド</div>
         <div>現在のターン : {{ turn }}/{{ turnsPerRound }} ターン</div>
 
         <!-- <input type="text" v-model="input" />

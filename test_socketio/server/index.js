@@ -629,9 +629,8 @@ io.on("connection", (socket) => {
         rooms[roomIndex].deck = new Deck(1);
 
         //手札の初期化
-        for (var i = 0; i < rooms[roomIndex].cards.length; i++) {
-            rooms[roomIndex].cards[i].card = [];
-            rooms[roomIndex].cards[i].num = 0;
+        for (var key in room.cards) {
+            room.cards[key] = [];
         }
 
         rooms[roomIndex].isGameOver = false;
