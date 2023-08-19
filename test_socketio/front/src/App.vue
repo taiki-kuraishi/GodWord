@@ -1,7 +1,5 @@
 <template>
   <div id="app">
-    <!-- ---------- HEAD ---------- -->
-    <h5>test socket.io</h5>
     <!-- 入室済の場合、部屋の情報を表示 -->
     <div v-if="isJoined">
       <div>{{ userName }} さん</div>
@@ -10,13 +8,15 @@
 
     <!-- 未入室の場合、部屋を作る or 部屋に入るを選択 -->
     <div v-else>
+      <!-- ---------- HEAD ---------- -->
+      <h5>GOD WORD</h5>
       <div>名前: <input v-model="userName" type="text" /></div>
 
       <input type="radio" v-model="joinType" value="1" />新しく部屋を作る
       <input type="radio" v-model="joinType" value="2" />友達の部屋に入る
 
       <div v-if="joinType == 1">
-        <input type="button" value="部屋を作る" @click="createRoom" />
+        <input type="button" class="create_room_button" value="部屋を作る" @click="createRoom" />
       </div>
 
       <div v-if="joinType == 2">
@@ -364,6 +364,34 @@ export default {
 
 <style>
 #app {
+  padding: 1em;
   text-align: center;
+  background-color: #55bb99
 }
+
+h5{
+  color: orange;
+  font-size: 100px;
+}
+
+.create_room_button{
+  display: block;
+	text-align: center;
+	vertical-align: middle;
+	text-decoration: none;
+	width: 120px;
+	margin: auto;
+	padding: 1rem 4rem;
+	font-weight: bold;
+	border-radius: 0.3rem;
+	border-bottom: 7px solid #0686b2;
+	background: #27acd9;
+	color: #fff;
+}
+.create_room_button:hover {
+	margin-top: 6px;
+	border-bottom: 1px solid #0686b2;
+	color: #fff;
+}
+
 </style>
