@@ -8,7 +8,12 @@
 
     <!-- 入室済の場合、部屋の情報を表示 -->
     <div v-if="isJoined">
-      <h2>GOD WORD</h2>
+      <div class="">
+        <h2>GOD WORD</h2>
+        <!-- 終了ボタン -->
+        <input type="button" value="終了" class="exitbutton" @click="exit" /><br>
+      </div>
+
       <div class="player_info">{{ userName }} さん<br>
       部屋番号: {{ roomId }}
       </div>
@@ -206,10 +211,7 @@
           </div>
         </div>
 
-        <!-- 終了ボタン -->
-        <div>
-          <input type="button" value="終了" @click="exit" />
-        </div>
+        
       </div>
     </div>
   </div>
@@ -489,5 +491,23 @@ h2 {
   text-align: right;
   background: #fff;
 
+}
+
+.exitbutton{
+  display: block;
+	text-decoration: none;
+  padding: auto;
+	margin: auto;
+	padding: 0.5em 2em;
+	font-weight: bold;
+	background: linear-gradient(to top, rgb(5, 130, 174), #27acd9);
+	color: #fff;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, .2);
+	-webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, .2);
+	transition: 0.5s;
+}
+.exitbutton:hover {
+	color: #fff;
+	opacity: 0.5;
 }
 </style>
