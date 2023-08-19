@@ -1,5 +1,12 @@
 <template>
   <div id="app">
+=======
+    <!-- <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    /> -->
+    <!-- ---------- HEAD ---------- -->
+    <h5>GOD WORD</h5>
     <!-- 入室済の場合、部屋の情報を表示 -->
     <div v-if="isJoined">
       <div>{{ userName }} さん</div>
@@ -8,8 +15,7 @@
 
     <!-- 未入室の場合、部屋を作る or 部屋に入るを選択 -->
     <div v-else>
-      <!-- ---------- HEAD ---------- -->
-      <h5>GOD WORD</h5>
+      
       <div>名前: <input v-model="userName" type="text" /></div>
 
       <input type="radio" v-model="joinType" value="1" />新しく部屋を作る
@@ -377,7 +383,6 @@ h5{
 .create_room_button{
   display: block;
 	text-align: center;
-	vertical-align: middle;
 	text-decoration: none;
 	width: 120px;
 	margin: auto;
