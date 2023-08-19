@@ -476,8 +476,12 @@ io.on("connection", (socket) => {
         }
 
         //round_title_listにcollectが存在するか
-        if (rooms[roomIndex].round_title_list.includes(collect)) {
+        const foundIndex = rooms[roomIndex].round_title_list.findIndex(title => title === collect);
+        //round_title_listにcollectが存在するか
+        if (foundIndex !== -1) {
             console.log('\nData exists in round_title_list\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user, '\n\tcollect : ', collect);
+            //round_title_listから提出されたtitleの削除
+            rooms[roomIndex].round_title_list.splice(foundIndex,1);
             //手札から提出したカードの削除
             for (let i = rooms[roomIndex].cards[user.name].length - 1; i >= 0; i--) {
                 if (collect.includes(rooms[roomIndex].cards[user.name][i])) {
