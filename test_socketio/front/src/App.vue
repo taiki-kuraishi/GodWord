@@ -181,7 +181,7 @@
                 display: inline-block;
               "
             >
-              <input type="button" :value="word" />
+              <input type="button" :value="word" @click="action_hash(index)"/>
             </div>
             <br />
             <input type="button" value="キャンセル" @click="off_hash" />
@@ -401,7 +401,10 @@ export default {
     off_hash() {
       this.hash = false;
     },
-    action_hash() {},
+    action_hash(index) {
+      this.socket.emit("action_hash", index);
+      this.message = "";
+    },
 
     //提出
     action_collect() {
