@@ -8,10 +8,11 @@
 
     <!-- 入室済の場合、部屋の情報を表示 -->
     <div v-if="isJoined">
-      <div class="">
-        <h2>GOD WORD</h2>
+      <div class="title">
+        <h2>GOD WORD<input type="button" value="終了" class="exitbutton" @click="exit" /><br></h2>
         <!-- 終了ボタン -->
-        <input type="button" value="終了" class="exitbutton" @click="exit" /><br>
+
+       
       </div>
 
       <div class="player_info">{{ userName }} さん<br>
@@ -106,6 +107,7 @@
             v-bind:disabled="active_button(card, i)"
             @click="selectButton(card, i)"
             style="display: inline-block; margin-right: 10px"
+            class="card"
           />
         </div>
 
@@ -460,6 +462,7 @@ h1 {
   color: orange;
   font-style: italic;
   font-size: 130px;
+  text-shadow: -10px -20px 3px #808080;
 }
 
 h2 {
@@ -509,5 +512,28 @@ h2 {
 .exitbutton:hover {
 	color: #fff;
 	opacity: 0.5;
+}
+
+.card {
+  /* サイズ */
+  width: 100px;
+  height: 100px;
+
+  /* 線は border 系のプロパティで指定する */
+  border-style: solid;
+  border-width: 10px;
+  border-color: blueviolet;
+  border-radius: 20px;
+
+  /* その他 */
+  font-size: 30px;
+  font-weight: bold;
+  color: red;
+  background-color: khaki;
+}
+
+.title.exitbutton{
+  text-align: right;
+
 }
 </style>
