@@ -98,6 +98,15 @@ function calculateCRC32(room, inputString) {
     return crcValue;
 }
 
+//指定のカードを捨てる
+function delete_card(cards, target_cards) {
+    for (target_card of target_cards) {
+        const target_index = cards.find(card => card == target_card);
+        cards.splice(target_index, 1);
+    }
+    return cards
+}
+
 io.on("connection", (socket) => {
     // 部屋を新しく建てる
     socket.on("create", async (userName) => {
@@ -457,9 +466,10 @@ io.on("connection", (socket) => {
         }
 
         //手札からcollectの削除
-        for (let i = rooms[roomIndex].cards[user.name].length - 1; i >= 0; i--) {
-            if (collect.includes(rooms[roomIndex].cards[user.name][i])) {
-                rooms[roomIndex].cards[user.name].splice(i, 1);
+        for (const char of collect_array) {
+            const delete_index = rooms[roomIndex].cards[user.name].findIndex(card => card == char);
+            if (delete_index !== -1) {
+                rooms[roomIndex].cards[user.name].splice(delete_index, 1);
             }
         }
 
@@ -548,10 +558,13 @@ io.on("connection", (socket) => {
             console.log('\nData exists in round_title_list\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user, '\n\tcollect : ', collect);
             //round_title_listから提出されたtitleの削除
             rooms[roomIndex].round_title_list.splice(foundIndex, 1);
-            //手札から提出したカードの削除
-            for (let i = rooms[roomIndex].cards[user.name].length - 1; i >= 0; i--) {
-                if (collect.includes(rooms[roomIndex].cards[user.name][i])) {
-                    rooms[roomIndex].cards[user.name].splice(i, 1);
+            //手札から提出したカードの削除し、used_card_listに追加
+            for (const char of collect_array) {
+                const delete_index = rooms[roomIndex].cards[user.name].findIndex(card => card == char);
+                if (delete_index !== -1) {
+                    const deleted_card = rooms[roomIndex].cards[user.name].splice(delete_index, 1);
+                    //used_cardの管理
+                    rooms[roomIndex].used_count[deleted_card] += 1;
                 }
             }
             //point加算
@@ -559,18 +572,22 @@ io.on("connection", (socket) => {
         }
         //hash_dictにcollectが存在するか
         else if (Object.values(rooms[roomIndex].hash_dict).includes(collect)) {
+            console.log('\nData exists in hash_dict\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user, '\n\tcollect : ', collect);
             //提出されたhashのリセット
             for (var key in rooms[roomIndex].hash_dict) {
-                console.log(rooms[roomIndex].hash_dict[key], collect)
                 if (rooms[roomIndex].hash_dict[key] == collect) {
                     rooms[roomIndex].hash_dict[key] = key;
                     break
                 }
             }
             //手札から提出したカードの削除
-            for (let i = rooms[roomIndex].cards[user.name].length - 1; i >= 0; i--) {
-                if (collect.includes(rooms[roomIndex].cards[user.name][i])) {
-                    rooms[roomIndex].cards[user.name].splice(i, 1);
+            //手札からcollectの削除
+            for (const char of collect_array) {
+                const delete_index = rooms[roomIndex].cards[user.name].findIndex(card => card == char);
+                if (delete_index !== -1) {
+                    const deleted_card = rooms[roomIndex].cards[user.name].splice(delete_index, 1);
+                    //used_cardの管理
+                    rooms[roomIndex].used_count[deleted_card] += 1;
                 }
             }
             //point加算
@@ -580,6 +597,9 @@ io.on("connection", (socket) => {
             console.log('\nNot exist in round_title_list\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user, '\n\tcollect : ', collect);
             return
         }
+
+
+        //word_score_tableの処理
 
         // ターンプレイヤーを次のユーザーに進める
         rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
