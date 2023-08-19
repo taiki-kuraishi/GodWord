@@ -167,8 +167,23 @@
           </div>
           <div v-else></div>
         </div>
-        <div v-for="(word, i) in round_title_list" :key="i">
-          <p>{{ word }}</p>
+        <!-- round title list menu -->
+        <div v-for="(word, index) in round_title_list" :key="index">
+          <div
+            style="display: flex; flex-direction: row; justify-content: center"
+          >
+            <p
+              v-for="(char, index) in word"
+              :key="index"
+              :style="
+                char in cards[userName]
+                  ? 'color: red; margin: 0;'
+                  : 'margin: 0;'
+              "
+            >
+              {{ char }}
+            </p>
+          </div>
         </div>
 
         <!-- 終了ボタン -->
