@@ -298,9 +298,6 @@ io.on("connection", (socket) => {
         // ターンプレイヤーを次のユーザーに進める
         rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
 
-        //turnを進める
-        rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
-
         //ターンとラウンドの管理
         rooms[roomIndex] = process_turn(rooms[roomIndex]);
         //roomの更新
@@ -346,9 +343,6 @@ io.on("connection", (socket) => {
 
         // ターンプレイヤーを次のユーザーに進める
         rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
-
-        //turnを進める
-        rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
 
         //ターンとラウンドの管理
         rooms[roomIndex] = process_turn(rooms[roomIndex]);
@@ -400,9 +394,6 @@ io.on("connection", (socket) => {
         // ターンプレイヤーを次のユーザーに進める
         rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
 
-        //turnを進める
-        rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
-
         //ターンとラウンドの管理
         rooms[roomIndex] = process_turn(rooms[roomIndex]);
 
@@ -435,9 +426,6 @@ io.on("connection", (socket) => {
 
         // ターンプレイヤーを次のユーザーに進める
         rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
-
-        //turnを進める
-        rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
 
         //ターンとラウンドの管理
         rooms[roomIndex] = process_turn(rooms[roomIndex]);
@@ -498,9 +486,6 @@ io.on("connection", (socket) => {
 
         // ターンプレイヤーを次のユーザーに進める
         rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
-
-        //turnを進める
-        rooms[roomIndex].turn = rooms[roomIndex].turn + 1;
 
         //ターンとラウンドの管理
         rooms[roomIndex] = process_turn(rooms[roomIndex]);
