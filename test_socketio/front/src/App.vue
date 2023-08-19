@@ -15,7 +15,10 @@
 
     <!-- 未入室の場合、部屋を作る or 部屋に入るを選択 -->
     <div v-else>
+<<<<<<< HEAD
       <h5>GOD WORD</h5>
+=======
+>>>>>>> d16f88522cb3f870e432eb0c5d806c580615fa3e
       <div>名前: <input v-model="userName" type="text" /></div>
 
       <input
@@ -166,7 +169,6 @@
             </div>
           </div>
           <div v-else></div>
-          <p>{{ card_num }}</p>
         </div>
         <div v-for="(word, i) in round_title_list" :key="i">
           <p>{{ word }}</p>
@@ -390,11 +392,16 @@ export default {
   background-color: #55bb99;
 }
 
+<<<<<<< HEAD
 h1 {
+=======
+h5 {
+>>>>>>> d16f88522cb3f870e432eb0c5d806c580615fa3e
   color: orange;
   font-style: italic;
 }
 
+<<<<<<< HEAD
 h5 {
   color: orange;
   font-size: 135px;
@@ -405,11 +412,17 @@ h5 {
   margin: 1em;
 }
 
+=======
+>>>>>>> d16f88522cb3f870e432eb0c5d806c580615fa3e
 .create_room_button {
   display: block;
   text-align: center;
   text-decoration: none;
+<<<<<<< HEAD
   width: 240px;
+=======
+  width: 120px;
+>>>>>>> d16f88522cb3f870e432eb0c5d806c580615fa3e
   margin: auto;
   padding: 1rem 4rem;
   font-weight: bold;
