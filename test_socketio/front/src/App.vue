@@ -183,7 +183,7 @@
             >
               <input type="button" :value="word" />
             </div>
-            <br>
+            <br />
             <input type="button" value="キャンセル" @click="off_hash" />
           </div>
           <div v-else></div>
@@ -193,17 +193,14 @@
           <div
             style="display: flex; flex-direction: row; justify-content: center"
           >
-            <p
-              v-for="(char, index) in word"
-              :key="index"
-              :style="
-                char in cards[userName]
-                  ? 'color: red; margin: 0;'
-                  : 'margin: 0;'
-              "
-            >
-              {{ char }}
-            </p>
+            <div v-for="(char, index) in word" :key="index">
+              <div v-if="cards[userName].includes(char)">
+                <p style="color: red;">{{ char }}</p>
+              </div>
+              <div v-else>
+                <p>{{ char }}</p>
+              </div>
+            </div>
           </div>
         </div>
 
