@@ -85,11 +85,15 @@ function process_turn(room) {
 }
 
 //hash
-function calculateCRC32(inputString) {
+function calculateCRC32(room, inputString) {
     var crcValue = CRC32.str(inputString).toString(36).toLowerCase();
     //マイナスの検知
     if (crcValue[0] == '-') {
         crcValue = crcValue.slice(1);
+    }
+    //ダブり検知
+    if (room.round_title_list.includes(crcValue)) {
+        crcValue = calculateCRC32(room, crcValue)
     }
     return crcValue;
 }
@@ -419,7 +423,7 @@ io.on("connection", (socket) => {
         }
 
         //hashの生成
-        const hash_title = calculateCRC32(rooms[roomIndex].round_title_list[index]);
+        const hash_title = calculateCRC32(rooms[roomIndex], rooms[roomIndex].round_title_list[index]);
 
         //hash化したものをhash_dictに代入
         rooms[roomIndex].hash_dict[rooms[roomIndex].round_title_list[index]] = hash_title;
