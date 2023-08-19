@@ -168,6 +168,22 @@
           </div>
           <!-- hash menu -->
           <div v-else-if="hash">
+            <p>hashをかけたいtitleを選んでください</p>
+            <div
+              v-for="(word, index) in round_title_list"
+              :key="index"
+              style="
+                display: flex;
+                justify-content: space-around;
+                flex-wrap: wrap;
+                flex-basis: 20%;
+                margin-bottom: 10px;
+                display: inline-block;
+              "
+            >
+              <input type="button" :value="word" />
+            </div>
+            <br>
             <input type="button" value="キャンセル" @click="off_hash" />
           </div>
           <div v-else></div>
@@ -217,6 +233,7 @@ export default {
     turnUserName: "",
     posts: [],
     round_title_list: [],
+    hash_dict: {},
     cards: {},
     collectArray: [],
     collectText: [],
