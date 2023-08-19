@@ -8,17 +8,14 @@
 
     <!-- 入室済の場合、部屋の情報を表示 -->
     <div v-if="isJoined">
-      <h1>GOD WORD</h1>
+      <h5>GOD WORD</h5>
       <div>{{ userName }} さん</div>
       部屋番号: {{ roomId }}
     </div>
 
     <!-- 未入室の場合、部屋を作る or 部屋に入るを選択 -->
     <div v-else>
-<<<<<<< HEAD
-      <h5>GOD WORD</h5>
-=======
->>>>>>> d16f88522cb3f870e432eb0c5d806c580615fa3e
+      <h1>GOD WORD</h1>
       <div>名前: <input v-model="userName" type="text" /></div>
 
       <input
@@ -392,37 +389,22 @@ export default {
   background-color: #55bb99;
 }
 
-<<<<<<< HEAD
-h1 {
-=======
+h1{
+  color: orange;
+  font-style: italic;
+  font-size: 130px;
+}
+
 h5 {
->>>>>>> d16f88522cb3f870e432eb0c5d806c580615fa3e
   color: orange;
   font-style: italic;
 }
 
-<<<<<<< HEAD
-h5 {
-  color: orange;
-  font-size: 135px;
-  font-style: italic;
-}
-
-.create_room {
-  margin: 1em;
-}
-
-=======
->>>>>>> d16f88522cb3f870e432eb0c5d806c580615fa3e
 .create_room_button {
   display: block;
   text-align: center;
   text-decoration: none;
-<<<<<<< HEAD
   width: 240px;
-=======
-  width: 120px;
->>>>>>> d16f88522cb3f870e432eb0c5d806c580615fa3e
   margin: auto;
   padding: 1rem 4rem;
   font-weight: bold;
