@@ -271,6 +271,7 @@ export default {
       "k",
       "l",
       "m",
+      'n',
       "o",
       "p",
       "q",
