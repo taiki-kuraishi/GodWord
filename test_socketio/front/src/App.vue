@@ -159,6 +159,7 @@
                   :key="i"
                   type="button"
                   :value="char"
+                  v-bind:disabled="exchange_button_disabled()"
                   @click="action_exchange(char)"
                   style="display: inline-block; margin-right: 10px"
                 />
@@ -338,6 +339,15 @@ export default {
       this.collectText = this.collectArray.map((item) => item.btn).join("");
     },
 
+    //一度押したカードは押せなくなる処理
+    active_button(btn, index) {
+      return (
+        this.collectArray.find(
+          (item) => item.index === index && item.btn === btn
+        ) !== undefined
+      );
+    },
+
     //1文字消す
     pop_collect() {
       this.collectArray.pop();
@@ -391,10 +401,20 @@ export default {
       this.exchange = false;
     },
 
+    exchange_button_disabled(){
+      if(this.collectText.length < 4){
+        return true
+      }
+      else{
+        return false
+      }
+    },
+
     action_exchange(char) {
       this.socket.emit("action_exchange", this.collectText, char);
       this.message = "";
     },
+
 
     //hash
     on_hash() {
@@ -414,14 +434,6 @@ export default {
     action_collect() {
       this.socket.emit("action_collect", this.collectText);
       this.message = "";
-    },
-
-    active_button(btn, index) {
-      return (
-        this.collectArray.find(
-          (item) => item.index === index && item.btn === btn
-        ) !== undefined
-      );
     },
 
     restart() {
