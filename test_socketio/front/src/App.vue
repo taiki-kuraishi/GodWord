@@ -9,8 +9,9 @@
     <!-- 入室済の場合、部屋の情報を表示 -->
     <div v-if="isJoined">
       <h2>GOD WORD</h2>
-      <div>{{ userName }} さん</div>
+      <div class="player_info">{{ userName }} さん<br>
       部屋番号: {{ roomId }}
+      </div>
     </div>
 
     <!-- 未入室の場合、部屋を作る or 部屋に入るを選択 -->
@@ -468,5 +469,12 @@ h2 {
   margin-top: 6px;
   border-bottom: 1px solid #0686b2;
   color: #fff;
+}
+
+.player_info {
+  border: 1px;
+  text-align: right;
+  background: #fff;
+
 }
 </style>
