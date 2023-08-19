@@ -86,8 +86,12 @@ function process_turn(room) {
 
 //hash
 function calculateCRC32(inputString) {
-    const crcValue = CRC32.str(inputString);
-    return crcValue.toString(36).toLowerCase();
+    var crcValue = CRC32.str(inputString).toString(36).toLowerCase();
+    //マイナスの検知
+    if (crcValue[0] == '-') {
+        crcValue = crcValue.slice(1);
+    }
+    return crcValue;
 }
 
 io.on("connection", (socket) => {
@@ -423,8 +427,11 @@ io.on("connection", (socket) => {
             return;
         }
 
+        //hashの生成
+        const hash_title = calculateCRC32(rooms[roomIndex].round_title_list[index]);
+
         //hash化したものをhash_dictに代入
-        rooms[roomIndex].hash_dict[rooms[roomIndex].round_title_list[index]] = calculateCRC32(rooms[roomIndex].round_title_list[index]);
+        rooms[roomIndex].hash_dict[rooms[roomIndex].round_title_list[index]] = hash_title;
 
         // ターンプレイヤーを次のユーザーに進める
         rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);
@@ -437,7 +444,7 @@ io.on("connection", (socket) => {
 
         //roomの更新
         io.in(room.id).emit("updateRoom", room);
-        io.to(socket.id).emit("notifyError", "hash化が成功しました : " + rooms[roomIndex].round_title_list[index] + " --> " +  rooms[roomIndex].hash_dict[rooms[roomIndex].round_title_list[index]]);
+        io.to(socket.id).emit("notifyError", "hash化が成功しました : " + rooms[roomIndex].round_title_list[index] + " --> " + hash_title);
 
         console.log('\n<--- action_hash --->\n', room);
         console.log('\nhash_dict : \n', rooms[roomIndex].hash_dict);
