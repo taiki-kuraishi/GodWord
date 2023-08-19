@@ -9,14 +9,20 @@
     <!-- 入室済の場合、部屋の情報を表示 -->
     <div v-if="isJoined">
       <div class="title">
-        <h2>GOD WORD<input type="button" value="終了" class="exitbutton" @click="exit" /><br></h2>
+        <h2>
+          GOD WORD<input
+            type="button"
+            value="終了"
+            class="exitbutton"
+            @click="exit"
+          /><br />
+        </h2>
         <!-- 終了ボタン -->
-
-       
       </div>
 
-      <div class="player_info">{{ userName }} さん<br>
-      部屋番号: {{ roomId }}
+      <div class="player_info">
+        {{ userName }} さん<br />
+        部屋番号: {{ roomId }}
       </div>
     </div>
 
@@ -190,7 +196,7 @@
                 display: inline-block;
               "
             >
-              <input type="button" :value="word" @click="action_hash(index)"/>
+              <input type="button" :value="word" @click="action_hash(index)" />
             </div>
             <br />
             <input type="button" value="キャンセル" @click="off_hash" />
@@ -204,7 +210,7 @@
           >
             <div v-for="(char, index) in word" :key="index">
               <div v-if="cards[userName].includes(char)">
-                <p style="color: red;">{{ char }}</p>
+                <p style="color: red">{{ char }}</p>
               </div>
               <div v-else>
                 <p>{{ char }}</p>
@@ -212,8 +218,6 @@
             </div>
           </div>
         </div>
-
-        
       </div>
     </div>
   </div>
@@ -280,6 +284,8 @@ export default {
       "y",
       "z",
     ],
+    used_count: {},
+    word_score_table: {},
     points: {},
     isGameOver: false, //true : exchange menuの表示, false : exchange menuの非表示
     socket: io("http://localhost:3031"), //宛先 hamachiを使用する場合は,hamachiのIPに書き換えたください
@@ -304,6 +310,8 @@ export default {
       this.round_title_list = room.round_title_list;
       this.hash_dict = room.hash_dict;
       this.cards = room.cards;
+      this.used_count = room.used_count;
+      this.word_score_table = room.word_score_table;
       this.points = room.points;
       (this.collectArray = []), (this.collectText = []), (this.input = "");
       this.isGameOver = room.isGameOver;
@@ -403,12 +411,11 @@ export default {
       this.exchange = false;
     },
 
-    exchange_button_disabled(){
-      if(this.collectText.length < 4){
-        return true
-      }
-      else{
-        return false
+    exchange_button_disabled() {
+      if (this.collectText.length < 4) {
+        return true;
+      } else {
+        return false;
       }
     },
 
@@ -416,7 +423,6 @@ export default {
       this.socket.emit("action_exchange", this.collectText, char);
       this.message = "";
     },
-
 
     //hash
     on_hash() {
@@ -493,25 +499,24 @@ h2 {
   border: 1px;
   text-align: right;
   background: #fff;
-
 }
 
-.exitbutton{
+.exitbutton {
   display: block;
-	text-decoration: none;
+  text-decoration: none;
   padding: auto;
-	margin: auto;
-	padding: 0.5em 2em;
-	font-weight: bold;
-	background: linear-gradient(to top, rgb(5, 130, 174), #27acd9);
-	color: #fff;
-	box-shadow: 0 2px 5px rgba(0, 0, 0, .2);
-	-webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, .2);
-	transition: 0.5s;
+  margin: auto;
+  padding: 0.5em 2em;
+  font-weight: bold;
+  background: linear-gradient(to top, rgb(5, 130, 174), #27acd9);
+  color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: 0.5s;
 }
 .exitbutton:hover {
-	color: #fff;
-	opacity: 0.5;
+  color: #fff;
+  opacity: 0.5;
 }
 
 .card {
@@ -532,8 +537,7 @@ h2 {
   background-color: khaki;
 }
 
-.title.exitbutton{
+.title.exitbutton {
   text-align: right;
-
 }
 </style>
