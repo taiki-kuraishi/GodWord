@@ -110,6 +110,7 @@
             <input type="button" value="2倍" @click="action_double" />
             <input type="button" value="奪う" @click="on_rob" />
             <input type="button" value="交換" @click="on_exchange" />
+            <input type="button" value="ハッシュ" @click="on_hash" />
             <input type="button" value="提出" @click="action_collect" />
           </div>
           <!-- rob menu -->
@@ -165,6 +166,10 @@
               <input type="button" value="キャンセル" @click="off_exchange" />
             </div>
           </div>
+          <!-- hash menu -->
+          <div v-else-if="hash">
+            <input type="button" value="キャンセル" @click="off_hash" />
+          </div>
           <div v-else></div>
         </div>
         <!-- round title list menu -->
@@ -216,7 +221,8 @@ export default {
     collectArray: [],
     collectText: [],
     rob: false, //true : rob menuの表示, false : rob menuの非表示
-    exchange: false, //true : exchange menuの表示, false : exchange menuの非表示
+    exchange: false, // true : exchange menuの表示, false : exchange menuの非表示
+    hash: false, // true : hash menuの表示, false : hash menuの非表示
     exchange_character_list: [
       "0",
       "1",
@@ -336,6 +342,7 @@ export default {
     on_rob() {
       this.rob = true;
       this.exchange = false;
+      this.hash = false;
     },
 
     off_rob() {
@@ -360,6 +367,7 @@ export default {
     on_exchange() {
       this.exchange = true;
       this.rob = false;
+      this.hash = false;
     },
     off_exchange() {
       this.exchange = false;
@@ -369,6 +377,17 @@ export default {
       this.socket.emit("action_exchange", this.collectText, char);
       this.message = "";
     },
+
+    //hash
+    on_hash() {
+      this.hash = true;
+      this.rob = false;
+      this.exchange = false;
+    },
+    off_hash() {
+      this.hash = false;
+    },
+    action_hash() {},
 
     //提出
     action_collect() {
@@ -404,7 +423,7 @@ export default {
   background-color: #55bb99;
 }
 
-h1{
+h1 {
   color: orange;
   font-style: italic;
   font-size: 130px;
