@@ -1,5 +1,9 @@
 <template>
   <div id="app">
+    <!-- <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    /> -->
     <!-- ---------- HEAD ---------- -->
     <h5>test socket.io</h5>
     <!-- 入室済の場合、部屋の情報を表示 -->
