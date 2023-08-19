@@ -150,7 +150,6 @@
             </div>
           </div>
           <div v-else></div>
-          <p>{{ card_num }}</p>
         </div>
         <div v-for="(word, i) in round_title_list" :key="i">
           <p>{{ word }}</p>
