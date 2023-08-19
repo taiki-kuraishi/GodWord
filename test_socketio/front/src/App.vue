@@ -14,14 +14,18 @@
 
     <!-- 未入室の場合、部屋を作る or 部屋に入るを選択 -->
     <div v-else>
-      
       <div>名前: <input v-model="userName" type="text" /></div>
 
       <input type="radio" v-model="joinType" value="1" />新しく部屋を作る
       <input type="radio" v-model="joinType" value="2" />友達の部屋に入る
 
       <div v-if="joinType == 1">
-        <input type="button" class="create_room_button" value="部屋を作る" @click="createRoom" />
+        <input
+          type="button"
+          class="create_room_button"
+          value="部屋を作る"
+          @click="createRoom"
+        />
       </div>
 
       <div v-if="joinType == 2">
@@ -370,31 +374,30 @@ export default {
 #app {
   padding: 1em;
   text-align: center;
-  background-color: #55bb99
+  background-color: #55bb99;
 }
 
-h5{
+h5 {
   color: orange;
   font-size: 100px;
 }
 
-.create_room_button{
+.create_room_button {
   display: block;
-	text-align: center;
-	text-decoration: none;
-	width: 120px;
-	margin: auto;
-	padding: 1rem 4rem;
-	font-weight: bold;
-	border-radius: 0.3rem;
-	border-bottom: 7px solid #0686b2;
-	background: #27acd9;
-	color: #fff;
+  text-align: center;
+  text-decoration: none;
+  width: 120px;
+  margin: auto;
+  padding: 1rem 4rem;
+  font-weight: bold;
+  border-radius: 0.3rem;
+  border-bottom: 7px solid #0686b2;
+  background: #27acd9;
+  color: #fff;
 }
 .create_room_button:hover {
-	margin-top: 6px;
-	border-bottom: 1px solid #0686b2;
-	color: #fff;
+  margin-top: 6px;
+  border-bottom: 1px solid #0686b2;
+  color: #fff;
 }
-
 </style>
