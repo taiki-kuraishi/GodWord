@@ -432,7 +432,7 @@ io.on("connection", (socket) => {
 
         //roomの更新
         io.in(room.id).emit("updateRoom", room);
-        io.to(socket.id).emit("notifyError", "hash化が成功しました : " + rooms[roomIndex].round_title_list[index] + " --> " + hash_title);
+        io.to(room.id).emit("notifyError", "hash化が実行されました : " + rooms[roomIndex].round_title_list[index] + " --> " + hash_title);
 
         console.log('\n<--- action_hash --->\n', room);
         console.log('\nhash_dict : \n', rooms[roomIndex].hash_dict);
@@ -469,7 +469,26 @@ io.on("connection", (socket) => {
         if (foundIndex !== -1) {
             console.log('\nData exists in round_title_list\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user, '\n\tcollect : ', collect);
             //round_title_listから提出されたtitleの削除
-            rooms[roomIndex].round_title_list.splice(foundIndex,1);
+            rooms[roomIndex].round_title_list.splice(foundIndex, 1);
+            //手札から提出したカードの削除
+            for (let i = rooms[roomIndex].cards[user.name].length - 1; i >= 0; i--) {
+                if (collect.includes(rooms[roomIndex].cards[user.name][i])) {
+                    rooms[roomIndex].cards[user.name].splice(i, 1);
+                }
+            }
+            //point加算
+            rooms[roomIndex].points[user.name] = rooms[roomIndex].points[user.name] + collect.length;
+        }
+        //hash_dictにcollectが存在するか
+        else if (Object.values(rooms[roomIndex].hash_dict).includes(collect)) {
+            //提出されたhashのリセット
+            for (var key in rooms[roomIndex].hash_dict) {
+                console.log(rooms[roomIndex].hash_dict[key], collect)
+                if (rooms[roomIndex].hash_dict[key] == collect) {
+                    rooms[roomIndex].hash_dict[key] = key;
+                    break
+                }
+            }
             //手札から提出したカードの削除
             for (let i = rooms[roomIndex].cards[user.name].length - 1; i >= 0; i--) {
                 if (collect.includes(rooms[roomIndex].cards[user.name][i])) {
