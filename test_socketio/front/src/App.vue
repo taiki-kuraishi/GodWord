@@ -151,7 +151,7 @@
           <!-- collect_input_box -->
           <input type="text" v-model="collectText" readonly />
           <!-- delete_button -->
-          <input type="button" value="1文字消す" @click="pop_collect" class="action_button"/>
+          <input type="button" value="1文字消す" @click="pop_collect" class="delete_button"/>
 
           <!-- rob menu -->
           <div v-if="rob">
@@ -530,8 +530,23 @@ h2 {
   color: #fff;
 }
 
-.create_room_button:hover {
+.action_button:hover {
   border-bottom: 1px solid #0686b2;
+  color: #fff;
+}
+
+.delete_button {
+  text-align: center;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 0.3rem;
+  border-bottom: 7px solid rgb(153, 0, 0);
+  background: rgb(212, 0, 0);
+  color: #fff;
+}
+
+.delete_button:hover {
+  border-bottom: 1px solid rgb(153, 0, 0);
   color: #fff;
 }
 
