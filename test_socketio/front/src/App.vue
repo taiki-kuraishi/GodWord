@@ -86,11 +86,21 @@
         </div>
 
         <div class="enemy-card">
-          <div v-for="(card, i) in cards" :key="i">
-            <div>{{ i }} : " {{ card }} "</div>
-          </div>
-          <div v-for="(point, i) in points" :key="i">
-            <div>{{ i }} : " {{ point }} "ポイント</div>
+          <div v-for="(point, i,j) in points" :key="i">
+            <div v-if="i != userName">
+              <div>{{ i }}さん : " {{ point }} "ポイント</div>
+              <div>
+                <input
+                  v-for="(card, index) in cards[i]"
+                  :key="index"
+                  type="button"
+                  :value="card"
+                  style="display: inline-block; margin-right: 10px"
+                  :style="button_color_list[j]"
+                  readonly
+                />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -297,6 +307,12 @@ export default {
     word_score_table: {},
     points: {},
     isGameOver: false, //true : exchange menuの表示, false : exchange menuの非表示
+    button_color_list: [
+      "background-color: red",
+      "background-color: green",
+      "background-color: blue",
+      "background-color: pink",
+    ],
     socket: io("http://localhost:3031"), //宛先 hamachiを使用する場合は,hamachiのIPに書き換えたください
   }),
 
@@ -542,20 +558,20 @@ h2 {
   border: none;
   position: relative;
   cursor: pointer;
-  transition-duration: .2s;
+  transition-duration: 0.2s;
   box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.116);
   padding-left: 8px;
-  transition-duration: .5s;
+  transition-duration: 0.5s;
 }
 
 .card:hover {
   background-color: rgb(192, 255, 20);
-  transition-duration: .5s;
+  transition-duration: 0.5s;
 }
 
 .card:active {
   transform: scale(0.97);
-  transition-duration: .2s;
+  transition-duration: 0.2s;
 }
 
 .card:disabled {
@@ -580,6 +596,25 @@ h2 {
 .enemy-card {
   grid-row: 2;
   grid-column: 1/4;
+  text-align: left;
+}
+.enemy-card input {
+  width: 50px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  border-radius: 30px;
+  color: rgb(19, 19, 19);
+  font-weight: 600;
+  border: none;
+  position: relative;
+  cursor: pointer;
+  transition-duration: 0.2s;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.116);
+  padding-left: 8px;
+  transition-duration: 0.5s;
 }
 .title-menu {
   grid-row: 2;
@@ -594,7 +629,7 @@ h2 {
   grid-row: 3;
   grid-column: 4/7;
 }
-.score-table{
+.score-table {
   grid-row: 4;
   grid-column: 1/7;
 }
