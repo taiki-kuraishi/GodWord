@@ -49,6 +49,8 @@ const EXODIA = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 const ROBofTIME = 3;
 const ROUND_TITLE_AMOUNT = 10;
 
+const SCORE_TABLE_LIST = ['7', '6', '5', '4', '3', '2', '1', '-5'];
+
 function process_turn(room) {
     if (room.turn < room.turnsPerRound) {
         //turnを進める
@@ -600,8 +602,72 @@ io.on("connection", (socket) => {
             return
         }
 
-
         //word_score_tableの処理
+        const used_count_values = Object.values(rooms[roomIndex].used_count);
+        const uniqueValues_set = [...new Set(used_count_values)];
+        var uniqueValues_list = Array.from(uniqueValues_set);
+        uniqueValues_list.sort();
+
+        // uniqueValues_listを連番に
+        const consecutiveArray = [];
+        for (let i = 0; i < uniqueValues_list.length; i++) {
+            consecutiveArray.push(uniqueValues_list[i]); // 元の要素を追加
+
+            if (i < uniqueValues_list.length - 1) {
+                const current = uniqueValues_list[i];
+                const next = uniqueValues_list[i + 1];
+
+                if (next - current !== 1) {
+                    const diff = next - current;
+
+                    for (let j = 1; j < diff; j++) {
+                        consecutiveArray.push(current + j); // 連番でない部分の要素を挿入
+                    }
+                }
+            }
+        }
+
+        uniqueValues_list = consecutiveArray;
+
+        //word_score_tableの初期化
+        for (var key in rooms[roomIndex].word_score_table) {
+            rooms[roomIndex].word_score_table[key] = [];
+        }
+        if (1 <= uniqueValues_list.length && uniqueValues_list.length <= 8) {
+            for (var i = 0; i < SCORE_TABLE_LIST.length; i++) {
+                for (var key in rooms[roomIndex].used_count) {
+                    if (uniqueValues_list[0] == rooms[roomIndex].used_count[key]) {
+                        rooms[roomIndex].word_score_table[SCORE_TABLE_LIST[i]].push(key)
+                    }
+                }
+                uniqueValues_list.splice(0, 1);
+                if (uniqueValues_list.length == 0) {
+                    break
+                }
+            }
+        }
+        else if (8 < uniqueValues_list.length) {
+            const top_list = uniqueValues_list.splice(0, uniqueValues_list.length - 8);
+            for (var key in rooms[roomIndex].used_count) {
+                if (top_list.includes(rooms[roomIndex].used_count[key])) {
+                    rooms[roomIndex].word_score_table['7'].push(key)
+                }
+            }
+            for (var i = 0; i < SCORE_TABLE_LIST.length; i++) {
+                for (var key in rooms[roomIndex].used_count) {
+                    if (uniqueValues_list[0] == rooms[roomIndex].used_count[key]) {
+                        rooms[roomIndex].word_score_table[SCORE_TABLE_LIST[i]].push(key)
+                    }
+                }
+                uniqueValues_list.splice(0, 1);
+                if (uniqueValues_list.length == 0) {
+                    break
+                }
+            }
+        }
+        else {
+            console.log('error at score')
+        }
 
         // ターンプレイヤーを次のユーザーに進める
         rooms[roomIndex].turnUserIndex = getNextTurnUserIndex(room);

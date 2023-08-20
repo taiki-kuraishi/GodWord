@@ -218,6 +218,10 @@
             </div>
           </div>
         </div>
+        <!-- word_score_table menu -->
+        <div v-for="(value,key) in word_score_table" :key="key">
+          <p>{{ key }} : {{ value }}</p>
+        </div>
       </div>
     </div>
   </div>
