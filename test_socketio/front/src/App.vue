@@ -460,10 +460,10 @@ export default {
     },
 
     exchange_button_disabled() {
-      if (this.collectText.length < 4) {
-        return true;
-      } else {
+      if (this.collectText.length == 4) {
         return false;
+      } else {
+        return true;
       }
     },
 
