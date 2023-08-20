@@ -106,7 +106,7 @@
 
         <!-- round title list menu -->
         <div class="title-menu">
-          <div v-for="(word, index) in round_title_list" :key="index">
+          <div v-for="(word, i) in round_title_list" :key="i">
             <div
               style="
                 display: flex;
@@ -114,7 +114,7 @@
                 justify-content: center;
               "
             >
-              <div v-for="(char, index) in word" :key="index">
+              <div v-for="(char, j) in word" :key="j">
                 <div v-if="cards[userName].includes(char)">
                   <p style="color: red; margin: 0px">{{ char }}</p>
                 </div>
@@ -521,7 +521,7 @@ h2 {
 }
 
 .player_info {
-  border: 1px;
+  border: solid;
   text-align: right;
   background: #fff;
 }
