@@ -86,7 +86,7 @@
         </div>
 
         <div class="enemy-card">
-          <div v-for="(point, i,j) in points" :key="i">
+          <div v-for="(point, i, j) in points" :key="i">
             <div v-if="i != userName">
               <div>{{ i }}さん : " {{ point }} "ポイント</div>
               <div>
@@ -231,9 +231,32 @@
         </div>
         <!-- word_score_table menu -->
         <div class="score-table">
-          <div v-for="(value, key) in word_score_table" :key="key">
-            <p>{{ key }} : {{ value }}</p>
-          </div>
+          <table border="1" style="margin: auto">
+            <thead>
+              <tr>
+                <th>点数</th>
+                <th>文字</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(value, key) in word_score_table" :key="key">
+                <td>{{ key }}</td>
+                <td>
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: row;
+                      justify-content: center;
+                    "
+                  >
+                    <p v-for="(char, i) in value" :key="i" style="margin: 10px">
+                      {{ char }}
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
