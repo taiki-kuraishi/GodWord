@@ -78,16 +78,17 @@
       </div>
 
       <!-- 入力欄 -->
-      <div v-else class="container">
-        <div class="turn-round">
-          <div>{{ turnUserName }}さんのターン:</div>
-          <div>現在のラウンド : {{ round }}/3 ラウンド</div>
-          <div>現在のターン : {{ turn }}/{{ turnsPerRound }} ターン</div>
-        </div>
+      <div v-else>
+        <div class="container">
+          <div class="turn-round">
+            <div>{{ turnUserName }}さんのターン:</div>
+            <div>現在のラウンド : {{ round }}/3 ラウンド</div>
+            <div>現在のターン : {{ turn }}/{{ turnsPerRound }} ターン</div>
+          </div>
 
-        <div class="enemy-card">
-          <div v-for="(point, i, j) in points" :key="i">
-            <div v-if="i != userName">
+          <div class="enemy-card">
+            <div v-for="(point, i, j) in points" :key="i">
+              <div v-if="i != userName"></div>
               <div>{{ i }}さん : " {{ point }} "ポイント</div>
               <div>
                 <input
@@ -102,161 +103,205 @@
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- round title list menu -->
-        <div class="title-menu">
-          <div v-for="(word, i) in hash_dict" :key="i">
-            <div
-              style="
-                display: flex;
-                flex-direction: row;
-                justify-content: center;
-              "
-            >
-              <div v-for="(char, j) in word" :key="j">
-                <div v-if="cards[userName].includes(char)">
-                  <p style="color: red; margin: 0px">{{ char }}</p>
-                </div>
-                <div v-else>
-                  <p style="margin: 0px">{{ char }}</p>
+          <!-- round title list menu -->
+          <div class="title-menu">
+            <div v-for="(word, i) in hash_dict" :key="i">
+              <div
+                style="
+                  display: flex;
+                  flex-direction: row;
+                  justify-content: center;
+                "
+              >
+                <div v-for="(char, j) in word" :key="j">
+                  <div v-if="cards[userName].includes(char)">
+                    <p style="color: red; margin: 0px">{{ char }}</p>
+                  </div>
+                  <div v-else>
+                    <p style="margin: 0px">{{ char }}</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- 手札ボタン -->
-        <div class="hand">
-          <input
-            v-for="(card, i) in cards[userName]"
-            :key="i"
-            type="button"
-            :value="card"
-            v-bind:disabled="active_button(card, i)"
-            @click="selectButton(card, i)"
-            style="display: inline-block; margin-right: 10px"
-            class="card"
-          />
-        </div>
+          <!-- 手札ボタン -->
+          <div class="hand">
+            <input
+              v-for="(card, i) in cards[userName]"
+              :key="i"
+              type="button"
+              :value="card"
+              v-bind:disabled="active_button(card, i)"
+              @click="selectButton(card, i)"
+              style="display: inline-block; margin-right: 10px"
+              class="card"
+            />
+          </div>
 
-        <!-- action -->
-        <div class="action">
-          <input type="button" value="ドロー" @click="action_draw" class="action_button"/>
-          <input type="button" value="2倍" @click="action_double" class="action_button"/>
-          <input type="button" value="奪う" @click="on_rob" class="action_button"/>
-          <input type="button" value="交換" @click="on_exchange" class="action_button"/>
-          <input type="button" value="ハッシュ" @click="on_hash" class="action_button"/>
-          <input type="button" value="提出" @click="action_collect" class="action_button"/>
-          <!-- collect_input_box -->
-          <input type="text" v-model="collectText" readonly />
-          <!-- delete_button -->
-          <input type="button" value="1文字消す" @click="pop_collect" class="delete_button"/>
+          <!-- action -->
+          <div class="action">
+            <input
+              type="button"
+              value="ドロー"
+              @click="action_draw"
+              class="action_button"
+            />
+            <input
+              type="button"
+              value="2倍"
+              @click="action_double"
+              class="action_button"
+            />
+            <input
+              type="button"
+              value="奪う"
+              @click="on_rob"
+              class="action_button"
+            />
+            <input
+              type="button"
+              value="交換"
+              @click="on_exchange"
+              class="action_button"
+            />
+            <input
+              type="button"
+              value="ハッシュ"
+              @click="on_hash"
+              class="action_button"
+            />
+            <input
+              type="button"
+              value="提出"
+              @click="action_collect"
+              class="action_button"
+            />
+            <!-- collect_input_box -->
+            <input type="text" v-model="collectText" readonly />
+            <!-- delete_button -->
+            <input
+              type="button"
+              value="1文字消す"
+              @click="pop_collect"
+              class="delete_button"
+            />
 
-          <!-- rob menu -->
-          <div v-if="rob">
-            <div>
-              <div
-                v-if="
-                  2 <= Object.keys(cards).length && 3 <= cards[userName].length
-                "
-              >
-                <div><p>奪う相手を選択してください</p></div>
-                <div v-for="(card, i) in cards" :key="i">
+            <!-- rob menu -->
+            <div v-if="rob">
+              <div>
+                <div
+                  v-if="
+                    2 <= Object.keys(cards).length &&
+                    3 <= cards[userName].length
+                  "
+                >
+                  <div><p>奪う相手を選択してください</p></div>
+                  <div v-for="(card, i) in cards" :key="i">
+                    <input
+                      v-if="i != userName"
+                      type="button"
+                      :value="i"
+                      v-bind:disabled="rob_active_user(card.length)"
+                      @click="action_rob(i)"
+                      style="display: inline-block; margin-right: 10px"
+                    />
+                  </div>
+                </div>
+                <div v-else-if="rob && Object.keys(cards).length < 2">
+                  <p>奪う相手がいません</p>
+                </div>
+                <div v-else-if="rob && cards[userName].length < 3">
+                  <p>手札の枚数が足りません</p>
+                </div>
+                <input type="button" value="キャンセル" @click="off_rob" />
+              </div>
+            </div>
+
+            <!-- exchange menu -->
+            <div v-else-if="exchange">
+              <div>
+                <div v-if="4 <= cards[userName].length">
+                  <p>入手したい文字を選んでください</p>
                   <input
-                    v-if="i != userName"
+                    v-for="(char, i) in exchange_character_list"
+                    :key="i"
                     type="button"
-                    :value="i"
-                    v-bind:disabled="rob_active_user(card.length)"
-                    @click="action_rob(i)"
+                    :value="char"
+                    v-bind:disabled="exchange_button_disabled()"
+                    @click="action_exchange(char)"
                     style="display: inline-block; margin-right: 10px"
                   />
                 </div>
+                <div v-if="cards[userName].length < 4">
+                  <p>カードの枚数が足りません</p>
+                </div>
+                <div v-if="collectText.length < 4 || 4 < collectText.length">
+                  <p>交換するには4文字の入力が必要です</p>
+                </div>
+                <input type="button" value="キャンセル" @click="off_exchange" />
               </div>
-              <div v-else-if="rob && Object.keys(cards).length < 2">
-                <p>奪う相手がいません</p>
-              </div>
-              <div v-else-if="rob && cards[userName].length < 3">
-                <p>手札の枚数が足りません</p>
-              </div>
-              <input type="button" value="キャンセル" @click="off_rob" />
             </div>
-          </div>
-
-          <!-- exchange menu -->
-          <div v-else-if="exchange">
-            <div>
-              <div v-if="4 <= cards[userName].length">
-                <p>入手したい文字を選んでください</p>
+            <!-- hash menu -->
+            <div v-else-if="hash">
+              <p>hashをかけたいtitleを選んでください</p>
+              <div
+                v-for="(word, index) in round_title_list"
+                :key="index"
+                style="
+                  display: flex;
+                  justify-content: space-around;
+                  flex-wrap: wrap;
+                  flex-basis: 20%;
+                  margin-bottom: 10px;
+                  display: inline-block;
+                "
+              >
                 <input
-                  v-for="(char, i) in exchange_character_list"
-                  :key="i"
                   type="button"
-                  :value="char"
-                  v-bind:disabled="exchange_button_disabled()"
-                  @click="action_exchange(char)"
-                  style="display: inline-block; margin-right: 10px"
+                  :value="word"
+                  @click="action_hash(index)"
                 />
               </div>
-              <div v-if="cards[userName].length < 4">
-                <p>カードの枚数が足りません</p>
-              </div>
-              <div v-if="collectText.length < 4 || 4 < collectText.length">
-                <p>交換するには4文字の入力が必要です</p>
-              </div>
-              <input type="button" value="キャンセル" @click="off_exchange" />
+              <br />
+              <input type="button" value="キャンセル" @click="off_hash" />
             </div>
+            <div v-else></div>
           </div>
-          <!-- hash menu -->
-          <div v-else-if="hash">
-            <p>hashをかけたいtitleを選んでください</p>
-            <div
-              v-for="(word, index) in round_title_list"
-              :key="index"
-              style="
-                display: flex;
-                justify-content: space-around;
-                flex-wrap: wrap;
-                flex-basis: 20%;
-                margin-bottom: 10px;
-                display: inline-block;
-              "
-            >
-              <input type="button" :value="word" @click="action_hash(index)" />
-            </div>
-            <br />
-            <input type="button" value="キャンセル" @click="off_hash" />
+          <!-- word_score_table menu -->
+          <div class="score-table">
+            <table border="1" style="margin: auto">
+              <thead>
+                <tr>
+                  <th>点数</th>
+                  <th>文字</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(value, key) in word_score_table" :key="key">
+                  <td>{{ key }}</td>
+                  <td>
+                    <div
+                      style="
+                        display: flex;
+                        flex-direction: row;
+                        justify-content: center;
+                      "
+                    >
+                      <p
+                        v-for="(char, i) in value"
+                        :key="i"
+                        style="margin: 10px"
+                      >
+                        {{ char }}
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <div v-else></div>
-        </div>
-        <!-- word_score_table menu -->
-        <div class="score-table">
-          <table border="1" style="margin: auto">
-            <thead>
-              <tr>
-                <th>点数</th>
-                <th>文字</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(value, key) in word_score_table" :key="key">
-                <td>{{ key }}</td>
-                <td>
-                  <div
-                    style="
-                      display: flex;
-                      flex-direction: row;
-                      justify-content: center;
-                    "
-                  >
-                    <p v-for="(char, i) in value" :key="i" style="margin: 10px">
-                      {{ char }}
-                    </p>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
     </div>

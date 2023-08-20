@@ -100,15 +100,6 @@ function calculateCRC32(room, inputString) {
     return crcValue;
 }
 
-//指定のカードを捨てる
-function delete_card(cards, target_cards) {
-    for (target_card of target_cards) {
-        const target_index = cards.find(card => card == target_card);
-        cards.splice(target_index, 1);
-    }
-    return cards
-}
-
 io.on("connection", (socket) => {
     // 部屋を新しく建てる
     socket.on("create", async (userName) => {
@@ -213,10 +204,11 @@ io.on("connection", (socket) => {
             points: {
                 [userName]: 0
             },
+            isGameOver: false,
         };
         //DB access
         try {
-            const query_1 = `SELECT * FROM godwordtable ORDER BY random() LIMIT 100;`;
+            const query_1 = `SELECT * FROM godwordtable2 ORDER BY random() LIMIT 100;`;
             const result_1 = await client.query(query_1);
 
             for (const row of result_1.rows) {
@@ -806,8 +798,14 @@ io.on("connection", (socket) => {
 
         //pointの初期化
         for (var key in room.points) {
-            room.cards[key] = 0;
+            rooms[roomIndex].cards[key] = 0;
         }
+
+        //turnの初期化
+        rooms[roomIndex].turn = 0;
+
+        //roundの初期化
+        rooms[roomIndex].round = 0;
 
         rooms[roomIndex].isGameOver = false;
 
