@@ -308,10 +308,10 @@ export default {
     points: {},
     isGameOver: false, //true : exchange menuの表示, false : exchange menuの非表示
     button_color_list: [
-      "background-color: red",
-      "background-color: green",
-      "background-color: blue",
-      "background-color: pink",
+      "background-color: rgb(148, 238, 255)",
+      "background-color: rgb(203, 168, 211)",
+      "background-color: rgb(255, 135, 160)",
+      "background-color: rgb(218, 200, 171)",
     ],
     socket: io("http://localhost:3031"), //宛先 hamachiを使用する場合は,hamachiのIPに書き換えたください
   }),
