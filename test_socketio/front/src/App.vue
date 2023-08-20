@@ -529,21 +529,37 @@ h2 {
 }
 
 .card {
-  /* サイズ */
-  width: 100px;
-  height: 100px;
+  width: 110px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  background-color: rgb(161, 255, 20);
+  border-radius: 30px;
+  color: rgb(19, 19, 19);
+  font-weight: 600;
+  border: none;
+  position: relative;
+  cursor: pointer;
+  transition-duration: .2s;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.116);
+  padding-left: 8px;
+  transition-duration: .5s;
+}
 
-  /* 線は border 系のプロパティで指定する */
-  border-style: solid;
-  border-width: 10px;
-  border-color: blueviolet;
-  border-radius: 20px;
+.card:hover {
+  background-color: rgb(192, 255, 20);
+  transition-duration: .5s;
+}
 
-  /* その他 */
-  font-size: 30px;
-  font-weight: bold;
-  color: red;
-  background-color: khaki;
+.card:active {
+  transform: scale(0.97);
+  transition-duration: .2s;
+}
+
+.card:disabled {
+  background-color: rgb(192, 255, 20);
 }
 
 .title.exitbutton {
