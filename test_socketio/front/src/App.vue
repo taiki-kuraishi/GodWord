@@ -78,7 +78,7 @@
       </div>
 
       <!-- 入力欄 -->
-      <div v-else>
+      <div v-else class="container">
         <div>{{ turnUserName }}さんのターン:</div>
         <div>現在のラウンド : {{ round }}/3 ラウンド</div>
         <div>現在のターン : {{ turn }}/{{ turnsPerRound }} ターン</div>
@@ -545,4 +545,9 @@ h2 {
 .title.exitbutton {
   text-align: right;
 }
+
+.container {
+  display: flex;
+}
+
 </style>
