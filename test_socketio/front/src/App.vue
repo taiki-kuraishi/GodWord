@@ -204,6 +204,7 @@
           <div v-else></div>
         </div>
         <!-- round title list menu -->
+
         <div v-for="(word, index) in round_title_list" :key="index">
           <div
             style="display: flex; flex-direction: row; justify-content: center"
@@ -246,6 +247,7 @@ export default {
     round_title_list: [],
     hash_dict: {},
     cards: {},
+    temp_cards: {},
     collectArray: [],
     collectText: [],
     rob: false, //true : rob menuの表示, false : rob menuの非表示
