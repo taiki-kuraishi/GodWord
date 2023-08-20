@@ -79,32 +79,45 @@
 
       <!-- 入力欄 -->
       <div v-else class="container">
-        <div>{{ turnUserName }}さんのターン:</div>
-        <div>現在のラウンド : {{ round }}/3 ラウンド</div>
-        <div>現在のターン : {{ turn }}/{{ turnsPerRound }} ターン</div>
-
-        <!-- <input type="text" v-model="input" />
-        <input type="button" value="送信" @click="postWord" /> -->
-        <!-- 入力履歴 -->
-        <div v-for="(post, i) in posts" :key="i">
-          <div>{{ post.userName }} : " {{ post.word }} "</div>
-        </div>
-        <div v-for="(point, i) in points" :key="i">
-          <div>{{ i }} : " {{ point }} "ポイント</div>
+        <div class="turn-round">
+          <div>{{ turnUserName }}さんのターン:</div>
+          <div>現在のラウンド : {{ round }}/3 ラウンド</div>
+          <div>現在のターン : {{ turn }}/{{ turnsPerRound }} ターン</div>
         </div>
 
-        <!-- カード -->
-        <div v-for="(card, i) in cards" :key="i">
-          <div>{{ i }} : " {{ card }} "</div>
+        <div class="enemy-card">
+          <div v-for="(card, i) in cards" :key="i">
+            <div>{{ i }} : " {{ card }} "</div>
+          </div>
+          <div v-for="(point, i) in points" :key="i">
+            <div>{{ i }} : " {{ point }} "ポイント</div>
+          </div>
         </div>
 
-        <!-- collect_input_box -->
-        <input type="text" v-model="collectText" readonly />
-        <!-- delete_button -->
-        <input type="button" value="1文字消す" @click="pop_collect" />
+        <!-- round title list menu -->
+        <div class="title-menu">
+          <div v-for="(word, index) in round_title_list" :key="index">
+            <div
+              style="
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+              "
+            >
+              <div v-for="(char, index) in word" :key="index">
+                <div v-if="cards[userName].includes(char)">
+                  <p style="color: red; margin: 0px">{{ char }}</p>
+                </div>
+                <div v-else>
+                  <p style="margin: 0px">{{ char }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- 手札ボタン -->
-        <div>
+        <div class="hand">
           <input
             v-for="(card, i) in cards[userName]"
             :key="i"
@@ -118,15 +131,18 @@
         </div>
 
         <!-- action -->
-        <div>
-          <div>
-            <input type="button" value="ドロー" @click="action_draw" />
-            <input type="button" value="2倍" @click="action_double" />
-            <input type="button" value="奪う" @click="on_rob" />
-            <input type="button" value="交換" @click="on_exchange" />
-            <input type="button" value="ハッシュ" @click="on_hash" />
-            <input type="button" value="提出" @click="action_collect" />
-          </div>
+        <div class="action">
+          <input type="button" value="ドロー" @click="action_draw" />
+          <input type="button" value="2倍" @click="action_double" />
+          <input type="button" value="奪う" @click="on_rob" />
+          <input type="button" value="交換" @click="on_exchange" />
+          <input type="button" value="ハッシュ" @click="on_hash" />
+          <input type="button" value="提出" @click="action_collect" />
+          <!-- collect_input_box -->
+          <input type="text" v-model="collectText" readonly />
+          <!-- delete_button -->
+          <input type="button" value="1文字消す" @click="pop_collect" />
+
           <!-- rob menu -->
           <div v-if="rob">
             <div>
@@ -203,25 +219,11 @@
           </div>
           <div v-else></div>
         </div>
-        <!-- round title list menu -->
-
-        <div v-for="(word, index) in round_title_list" :key="index">
-          <div
-            style="display: flex; flex-direction: row; justify-content: center"
-          >
-            <div v-for="(char, index) in word" :key="index">
-              <div v-if="cards[userName].includes(char)">
-                <p style="color: red">{{ char }}</p>
-              </div>
-              <div v-else>
-                <p>{{ char }}</p>
-              </div>
-            </div>
-          </div>
-        </div>
         <!-- word_score_table menu -->
-        <div v-for="(value,key) in word_score_table" :key="key">
-          <p>{{ key }} : {{ value }}</p>
+        <div class="score-table">
+          <div v-for="(value, key) in word_score_table" :key="key">
+            <p>{{ key }} : {{ value }}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -277,7 +279,7 @@ export default {
       "k",
       "l",
       "m",
-      'n',
+      "n",
       "o",
       "p",
       "q",
@@ -546,10 +548,38 @@ h2 {
 
 .title.exitbutton {
   text-align: right;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 
 .container {
-  display: flex;
+  display: grid;
+  grid-template-rows: 10vw 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
 }
-
+.turn-round {
+  grid-row: 1;
+  grid-column: 1/7;
+}
+.enemy-card {
+  grid-row: 2;
+  grid-column: 1/4;
+}
+.title-menu {
+  grid-row: 2;
+  grid-column: 4/7;
+  margin: 0px;
+}
+.hand {
+  grid-row: 3;
+  grid-column: 1/4;
+}
+.action {
+  grid-row: 3;
+  grid-column: 4/7;
+}
+.score-table{
+  grid-row: 4;
+  grid-column: 1/7;
+}
 </style>
