@@ -555,6 +555,9 @@ io.on("connection", (socket) => {
             return
         }
 
+        //提出された文字の配列
+        const collect_char_list = []
+
         //round_title_listにcollectが存在するか
         const foundIndex = rooms[roomIndex].round_title_list.findIndex(title => title === collect);
         //round_title_listにcollectが存在するか
@@ -569,10 +572,10 @@ io.on("connection", (socket) => {
                     const deleted_card = rooms[roomIndex].cards[user.name].splice(delete_index, 1);
                     //used_cardの管理
                     rooms[roomIndex].used_count[deleted_card] += 1;
+                    //collect_char_listに提出された文字の追加
+                    collect_char_list.push(deleted_card);
                 }
             }
-            //point加算
-            rooms[roomIndex].points[user.name] = rooms[roomIndex].points[user.name] + collect.length;
         }
         //hash_dictにcollectが存在するか
         else if (Object.values(rooms[roomIndex].hash_dict).includes(collect)) {
@@ -585,21 +588,43 @@ io.on("connection", (socket) => {
                 }
             }
             //手札から提出したカードの削除
-            //手札からcollectの削除
             for (const char of collect_array) {
                 const delete_index = rooms[roomIndex].cards[user.name].findIndex(card => card == char);
                 if (delete_index !== -1) {
                     const deleted_card = rooms[roomIndex].cards[user.name].splice(delete_index, 1);
                     //used_cardの管理
                     rooms[roomIndex].used_count[deleted_card] += 1;
+                    //collect_char_listに提出された文字の追加
+                    collect_char_list.push(deleted_card);
                 }
             }
-            //point加算
-            rooms[roomIndex].points[user.name] = rooms[roomIndex].points[user.name] + collect.length;
         } else {
             io.to(socket.id).emit("notifyError", "データは存在しません");
             console.log('\nNot exist in round_title_list\n\troom.id : ', rooms[roomIndex].id, '\n\tuserName : ', user, '\n\tcollect : ', collect);
             return
+        }
+
+        //point処理
+        for (var char of collect_char_list) {
+            if (rooms[roomIndex].word_score_table['7'].includes(char[0])) {
+                rooms[roomIndex].points[user.name] = rooms[roomIndex].points[user.name] + 7;
+            } else if (rooms[roomIndex].word_score_table['6'].includes(char[0])) {
+                rooms[roomIndex].points[user.name] = rooms[roomIndex].points[user.name] + 6;
+            } else if (rooms[roomIndex].word_score_table['5'].includes(char[0])) {
+                rooms[roomIndex].points[user.name] = rooms[roomIndex].points[user.name] + 5;
+            } else if (rooms[roomIndex].word_score_table['4'].includes(char[0])) {
+                rooms[roomIndex].points[user.name] = rooms[roomIndex].points[user.name] + 4;
+            } else if (rooms[roomIndex].word_score_table['3'].includes(char[0])) {
+                rooms[roomIndex].points[user.name] = rooms[roomIndex].points[user.name] + 3;
+            } else if (rooms[roomIndex].word_score_table['2'].includes(char[0])) {
+                rooms[roomIndex].points[user.name] = rooms[roomIndex].points[user.name] + 2;
+            } else if (rooms[roomIndex].word_score_table['1'].includes(char[0])) {
+                rooms[roomIndex].points[user.name] = rooms[roomIndex].points[user.name] + 1;
+            } else if (rooms[roomIndex].word_score_table['-5'].includes(char[0])) {
+                rooms[roomIndex].points[user.name] = rooms[roomIndex].points[user.name] + -5;
+            } else {
+                console.log('error at point')
+            }
         }
 
         //word_score_tableの処理
