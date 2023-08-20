@@ -521,7 +521,7 @@ h2 {
 }
 
 .player_info {
-  border: 1px;
+  border: solid;
   text-align: right;
   background: #fff;
 }
