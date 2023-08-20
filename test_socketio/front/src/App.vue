@@ -559,7 +559,7 @@ h2 {
 }
 
 .card:disabled {
-  background-color: rgb(192, 255, 20);
+  background-color: rgb(220, 255, 20);
 }
 
 .title.exitbutton {
