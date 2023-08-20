@@ -106,7 +106,7 @@
 
         <!-- round title list menu -->
         <div class="title-menu">
-          <div v-for="(word, i) in round_title_list" :key="i">
+          <div v-for="(word, i) in hash_dict" :key="i">
             <div
               style="
                 display: flex;
