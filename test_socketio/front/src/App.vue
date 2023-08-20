@@ -142,16 +142,16 @@
 
         <!-- action -->
         <div class="action">
-          <input type="button" value="ドロー" @click="action_draw" />
-          <input type="button" value="2倍" @click="action_double" />
-          <input type="button" value="奪う" @click="on_rob" />
-          <input type="button" value="交換" @click="on_exchange" />
-          <input type="button" value="ハッシュ" @click="on_hash" />
-          <input type="button" value="提出" @click="action_collect" />
+          <input type="button" value="ドロー" @click="action_draw" class="action_button"/>
+          <input type="button" value="2倍" @click="action_double" class="action_button"/>
+          <input type="button" value="奪う" @click="on_rob" class="action_button"/>
+          <input type="button" value="交換" @click="on_exchange" class="action_button"/>
+          <input type="button" value="ハッシュ" @click="on_hash" class="action_button"/>
+          <input type="button" value="提出" @click="action_collect" class="action_button"/>
           <!-- collect_input_box -->
           <input type="text" v-model="collectText" readonly />
           <!-- delete_button -->
-          <input type="button" value="1文字消す" @click="pop_collect" />
+          <input type="button" value="1文字消す" @click="pop_collect" class="action_button"/>
 
           <!-- rob menu -->
           <div v-if="rob">
@@ -516,6 +516,21 @@ h2 {
 }
 .create_room_button:hover {
   margin-top: 6px;
+  border-bottom: 1px solid #0686b2;
+  color: #fff;
+}
+
+.action_button {
+  text-align: center;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 0.3rem;
+  border-bottom: 7px solid #0686b2;
+  background: #27acd9;
+  color: #fff;
+}
+
+.create_room_button:hover {
   border-bottom: 1px solid #0686b2;
   color: #fff;
 }
